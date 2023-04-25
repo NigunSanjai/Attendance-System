@@ -1,3 +1,235 @@
 <div class="main">
-  <nav class="na"></nav>
+  <nav class="nav">
+    <div class="sec1">
+      <span class="title">Attendance Management ({{ username }})</span>
+    </div>
+    <div class="sec2">
+      <img [src]="url" alt="" (click)="toggleLogout()" />
+    </div>
+  </nav>
+  <button *ngIf="showLogout" class="logout" (click)="logout()">LogOut</button>
+  <div class="mainflex">
+    <div class="sidenav">
+      <div class="sn" (click)="toggleDash()">
+        <p>Dashboard</p>
+      </div>
+      <div class="sn" (click)="toggleae()"><p>Add/Edit Profile</p></div>
+      <div class="sn"><p>Dashboard</p></div>
+    </div>
+    <div class="main-section" [ngStyle]="{ 'margin-right': marginRight }">
+      <div class="dashboard" *ngIf="showDash">
+        <form
+          (ngSubmit)="onSubmit()"
+          [formGroup]="myForm"
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <div>
+            <mat-form-field class="year">
+              <mat-label>Select the Year</mat-label>
+              <mat-select formControlName="year">
+                <mat-option value="I">I Year</mat-option>
+                <mat-option value="II">II Year</mat-option>
+                <mat-option value="III">III Year</mat-option>
+                <mat-option value="IV">IV Year</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field class="year">
+              <mat-label>Select the Section</mat-label>
+              <mat-select formControlName="section">
+                <mat-option value="A">A</mat-option>
+                <mat-option value="B">B</mat-option>
+                <mat-option value="C">C</mat-option>
+                <mat-option value="D">D</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div style="display: flex; gap: 1rem">
+            <mat-form-field appearance="fill">
+              <mat-label>Mentor - 1 Mail Id</mat-label>
+              <input
+                matInput
+                type="email"
+                name="email"
+                required
+                formControlName="mentor1"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Mentor - 2 Mail Id</mat-label>
+              <input
+                matInput
+                type="email"
+                name="email"
+                required
+                formControlName="mentor2"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Mentor - 3 Mail Id</mat-label>
+              <input
+                matInput
+                type="email"
+                name="email"
+                formControlName="mentor3"
+              />
+            </mat-form-field>
+          </div>
+          <div class="fileUpload">
+            <input
+              formControlName="file"
+              type="file"
+              class="upload"
+              accept=".csv"
+              (change)="onFileSelected($event)"
+            />
+            <span>Upload the CSV Data</span>
+          </div>
+          <div>
+            <button type="submit" class="fileUpload" style="text-align: center">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="add-edit" *ngIf="showae" style="margin-right: 20px">
+        <div class="fields">
+          <div style="margin-top: 30px">
+            <mat-form-field class="year">
+              <mat-label>Select the Year</mat-label>
+              <mat-select [(ngModel)]="userreqyear">
+                <mat-option value="I">I Year</mat-option>
+                <mat-option value="II">II Year</mat-option>
+                <mat-option value="III">III Year</mat-option>
+                <mat-option value="IV">IV Year</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div style="margin-top: 30px">
+            <mat-form-field class="year">
+              <mat-label>Select the Section</mat-label>
+              <mat-select [(ngModel)]="userreqsec">
+                <mat-option value="A">A</mat-option>
+                <mat-option value="B">B</mat-option>
+                <mat-option value="C">C</mat-option>
+                <mat-option value="D">D</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div style="text-align: center">
+            <button type="submit" class="fileUpload" (click)="getData()">
+              Submit
+            </button>
+          </div>
+        </div>
+        <div class="mat-elevation-z8" *ngIf="showTable">
+          <mat-form-field>
+            <input
+              matInput
+              (keyup)="Filterchange($event)"
+              placeholder="Enter the text"
+            />
+          </mat-form-field>
+          <div
+            style="
+              position: relative;
+              width: 100%;
+              height: 300px;
+              overflow: auto;
+            "
+          >
+            <mat-table
+              #table
+              [dataSource]="dataSource"
+              matSort
+              style="position: absolute"
+            >
+              <!-- Name Column -->
+              <ng-container matColumnDef="Name of the Student">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Name
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  {{ element.name }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Register No Column -->
+              <ng-container matColumnDef="Register Number">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Register No
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  {{ element.register_no }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Mail ID Column -->
+              <ng-container matColumnDef="Official Mail ID (College)">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Mail ID
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  {{ element.mail_id }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Father Mobile No Column -->
+              <ng-container matColumnDef="Father Mobile number">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Father Mobile No
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  {{ element.father_mobile_number }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Mother Mobile No Column -->
+              <ng-container matColumnDef="Mother Mobile number">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Mother Mobile No
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  {{ element.mother_mobile_number }}
+                </mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="Action">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Action
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    style="margin-right: 2px"
+                  >
+                    Edit
+                  </button>
+                  <button mat-raised-button color="warn">Delete</button>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row
+                *matHeaderRowDef="displayedColumns"
+              ></mat-header-row>
+              <mat-row
+                *matRowDef="let row; columns: displayedColumns"
+              ></mat-row>
+            </mat-table>
+          </div>
+          <mat-paginator
+            [pageSizeOptions]="[5, 10, 20, 40, 60]"
+            showFirstLastButtons
+          ></mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

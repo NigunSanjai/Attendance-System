@@ -6,12 +6,12 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-
+import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -22,21 +22,7 @@ export class AuthGuard implements CanActivate {
       return true;
     } else {
       // If the user is not logged in, redirect to the home page
-      this.router.navigate(['']);
       return false;
-    }
-  }
-
-  canDeactivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean | UrlTree {
-    if (sessionStorage.getItem('token') && sessionStorage.getItem('user')) {
-      // If the user is logged in, prevent navigation back to the home page
-      return false;
-    } else {
-      // If the user is not logged in, allow navigation back to the home page
-      return true;
     }
   }
 }

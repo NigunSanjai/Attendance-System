@@ -8,24 +8,22 @@ import { HomeComponent } from './home/home.component';
 import { AuthGuard } from './auth.guard';
 import { HomeGuard } from './homeguard.guard';
 const routes: Routes = [
+  { path: 'root', component: AppComponent },
   { path: '', component: HomeComponent, canActivate: [HomeGuard] },
   {
     path: 'admin',
     component: AdminComponent,
     canActivate: [AuthGuard],
-    canDeactivate: [AuthGuard],
   },
   {
     path: 'faculty',
     component: FacultyComponent,
     canActivate: [AuthGuard],
-    canDeactivate: [AuthGuard],
   },
   {
     path: 'student',
     component: StudentComponent,
     canActivate: [AuthGuard],
-    canDeactivate: [AuthGuard],
   }, // Redirect to home component for all other paths
 ];
 

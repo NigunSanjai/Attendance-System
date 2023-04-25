@@ -14,15 +14,19 @@ export class HomeComponent implements OnInit {
   loggedIn: boolean;
   adminEmail = 'departmentcsekpr@gmail.com';
   userType: string;
-
   constructor(
     private authService: SocialAuthService,
     private toastr: ToastrService,
     private authServiceApi: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private cookieService: CookieService
+  ) {
+    // sessionStorage.setItem('notloggedin', 'true');
+  }
   ngOnInit() {
     sessionStorage.clear();
+    sessionStorage.setItem('notloggedin', 'true');
+    this.cookieService.deleteAll();
     this.authService.authState.subscribe((user) => {
       this.user = user;
       this.loggedIn = user != null;
@@ -59,6 +63,7 @@ export class HomeComponent implements OnInit {
                 console.log('yes');
                 // store the JWT token in local storage
                 sessionStorage.setItem('token', response.access_token);
+                sessionStorage.setItem('notloggedin', 'false');
 
                 // redirect the user to the appropriate component based on user type
                 if (this.userType === 'admin') {
