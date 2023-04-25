@@ -129,13 +129,23 @@
           </div>
         </div>
         <div class="mat-elevation-z8" *ngIf="showTable">
-          <mat-form-field>
-            <input
-              matInput
-              (keyup)="Filterchange($event)"
-              placeholder="Enter the text"
-            />
-          </mat-form-field>
+          <div style="display: flex; justify-content: space-between">
+            <mat-form-field>
+              <input
+                matInput
+                (keyup)="Filterchange($event)"
+                placeholder="Enter the text"
+              />
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="accent"
+              style="text-align: end"
+              (click)="openPopup()"
+            >
+              Add New Data
+            </button>
+          </div>
           <div
             style="
               position: relative;
@@ -200,19 +210,48 @@
                 </mat-cell>
               </ng-container>
 
-              <ng-container matColumnDef="Action">
+              <ng-container matColumnDef="Edit">
                 <mat-header-cell *matHeaderCellDef mat-sort-header>
-                  Action
+                  Edit
                 </mat-header-cell>
                 <mat-cell *matCellDef="let element">
                   <button
-                    mat-raised-button
+                    mat-mini-fab
                     color="primary"
-                    style="margin-right: 2px"
+                    aria-label="Example icon button with a menu icon"
+                    (click)="editPopup(element)"
                   >
-                    Edit
+                    <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-raised-button color="warn">Delete</button>
+                  <!-- <button
+                    mat-mini-fab
+                    color="warn"
+                    aria-label="Example icon button with a menu icon"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button> -->
+                </mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="Delete">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Delete
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  <!-- <button
+                    mat-mini-fab
+                    color="primary"
+                    aria-label="Example icon button with a menu icon"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button> -->
+                  <button
+                    mat-mini-fab
+                    color="warn"
+                    aria-label="Example icon button with a menu icon"
+                    (click)="deletePopup(element)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </mat-cell>
               </ng-container>
 

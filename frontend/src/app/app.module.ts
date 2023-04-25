@@ -36,6 +36,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { PopupComponent } from './popup/popup.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     FacultyComponent,
     StudentComponent,
     HomeComponent,
+    PopupComponent,
   ],
   imports: [
     BrowserModule,

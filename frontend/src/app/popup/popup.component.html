@@ -1,0 +1,125 @@
+<div *ngIf="showAdd">
+  <h1 mat-dialog-title>Add new Student Data</h1>
+  <div
+    mat-dialog-content
+    style="
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <div style="display: flex; gap: 2rem">
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Student Name</mat-label>
+          <input matInput [(ngModel)]="studentData.name" />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Register Number</mat-label>
+          <input matInput [(ngModel)]="studentData.registerNumber" />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Official Mail Id</mat-label>
+          <input matInput [(ngModel)]="studentData.mailid" />
+        </mat-form-field>
+      </div>
+    </div>
+    <div style="display: flex; gap: 2rem">
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Father Mobile Number</mat-label>
+          <input matInput [(ngModel)]="studentData.fatherMobileNumber" />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Mother Mobile Number</mat-label>
+          <input matInput [(ngModel)]="studentData.motherMobileNumber" />
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+  <div
+    mat-dialog-actions
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    "
+  >
+    <button mat-raised-button color="primary" (click)="submit()">
+      Add Student
+    </button>
+    <button mat-button mat-dialog-close color="warn">Close</button>
+  </div>
+</div>
+
+<div *ngIf="showEdit">
+  <h1 mat-dialog-title>Edit Student Data</h1>
+  <div
+    mat-dialog-content
+    style="
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <div style="display: flex; gap: 2rem">
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Student Name</mat-label>
+          <input matInput [(ngModel)]="editData.name" />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Register Number</mat-label>
+          <input matInput [(ngModel)]="editData.registerNumber" readonly />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Official Mail Id</mat-label>
+          <input matInput [(ngModel)]="editData.mail_id" />
+        </mat-form-field>
+      </div>
+    </div>
+    <div style="display: flex; gap: 2rem">
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Father Mobile Number</mat-label>
+          <input matInput [(ngModel)]="editData.father_mobile_number" />
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter Mother Mobile Number</mat-label>
+          <input matInput [(ngModel)]="result.mother_mobile_number" />
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+  <div
+    mat-dialog-actions
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    "
+  >
+    <button mat-raised-button color="primary" (click)="editsubmit()">
+      Update Student
+    </button>
+    <button mat-button mat-dialog-close color="warn">Close</button>
+  </div>
+</div>

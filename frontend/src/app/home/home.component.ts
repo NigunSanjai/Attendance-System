@@ -1,7 +1,7 @@
 import { SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 import { Component, OnInit } from '@angular/core';
 import { Toast, ToastrService } from 'ngx-toastr';
-import { AuthService } from '../auth.service';
+import { AuthService } from 'src/app/auth.service';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 @Component({

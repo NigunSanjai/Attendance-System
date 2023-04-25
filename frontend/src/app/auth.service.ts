@@ -34,4 +34,44 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getdata`, data).toPromise();
   }
+  updateStudent(
+    name: any,
+    regno: any,
+    mailid: any,
+    father: any,
+    mother: any,
+    year: any,
+    sec: any
+  ) {
+    const data = {
+      name: name,
+      regno: regno,
+      mailid: mailid,
+      fatherno: father,
+      motherno: mother,
+      year: year,
+      section: sec,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/addStudent`, data);
+  }
+  editStudent(
+    name: any,
+    regno: any,
+    mailid: any,
+    father: any,
+    mother: any,
+    year: any,
+    sec: any
+  ) {
+    const data = {
+      name: name,
+      regno: regno,
+      mailid: mailid,
+      fatherno: father,
+      motherno: mother,
+      year: year,
+      section: sec,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/editStudent`, data);
+  }
 }

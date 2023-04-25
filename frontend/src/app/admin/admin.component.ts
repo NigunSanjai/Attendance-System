@@ -11,6 +11,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { Renderer2 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { PopupComponent } from '../popup/popup.component';
 
 @Component({
   selector: 'app-admin',
@@ -36,7 +38,8 @@ export class AdminComponent implements OnInit {
     'Official Mail ID (College)',
     'Father Mobile number',
     'Mother Mobile number',
-    'Action',
+    'Edit',
+    'Delete',
   ];
   userreqyear!: any;
   userreqsec!: any;
@@ -59,7 +62,8 @@ export class AdminComponent implements OnInit {
     private auth: AuthService,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private matdialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -99,6 +103,119 @@ export class AdminComponent implements OnInit {
       fileSource: file,
     });
   }
+  openPopup() {
+    const popup = this.matdialog.open(PopupComponent, {
+      width: '80%',
+      height: '420px',
+      enterAnimationDuration: '1000ms',
+      exitAnimationDuration: '1000ms',
+      disableClose: true,
+      data: {
+        current: 'Add',
+      },
+    });
+    popup.afterClosed().subscribe((item) => {
+      if (item.action == 'add') {
+        this.auth
+          .updateStudent(
+            item.name,
+            item.registerNumber,
+            item.mailid,
+            item.fatherMobileNumber,
+            item.motherMobileNumber,
+
+            this.userreqyear,
+            this.userreqsec
+          )
+          .subscribe((response) => {
+            console.log(response);
+            if (response.message == 'success') {
+              this.toastr.success('Data added Sucessfully');
+              this.getData();
+            } else if (response.message == 'duplicate') {
+              this.toastr.warning('Student Already Exists');
+            }
+          });
+      }
+    });
+  }
+
+  editPopup(element: any) {
+    console.log(element);
+    const popup = this.matdialog.open(PopupComponent, {
+      width: '80%',
+      height: '420px',
+      enterAnimationDuration: '1000ms',
+      exitAnimationDuration: '1000ms',
+      data: {
+        current: 'Edit',
+        name: element.name,
+        registerNumber: element.register_no,
+        mail_id: element.mail_id,
+        father_mobile_number: element.father_mobile_number,
+        mother_mobile_number: element.mother_mobile_number,
+      },
+    });
+    popup.afterClosed().subscribe((item) => {
+      if (item.action == 'add') {
+        this.auth
+          .editStudent(
+            item.name,
+            item.registerNumber,
+            item.mail_id,
+            item.father_mobile_number,
+            item.mother_mobile_number,
+            this.userreqyear,
+            this.userreqsec
+          )
+          .subscribe((response) => {
+            console.log(response);
+            if (response.message == 'success') {
+              this.toastr.success('Data Updated Sucessfully');
+              this.getData();
+            } else if (response.message == 'duplicate') {
+              this.toastr.warning('Student Already Exists');
+            }
+          });
+      }
+    });
+  }
+  deletePopup(element: any) {
+    console.log(element);
+    const popup = this.matdialog.open(PopupComponent, {
+      width: '80%',
+      height: '420px',
+      enterAnimationDuration: '1000ms',
+      exitAnimationDuration: '1000ms',
+      data: {
+        current: 'Delete',
+      },
+    });
+    popup.afterClosed().subscribe((item) => {
+      if (item.action == 'delete') {
+        this.auth
+          .editStudent(
+            item.name,
+            item.registerNumber,
+            item.mail_id,
+            item.father_mobile_number,
+            item.mother_mobile_number,
+            this.userreqyear,
+            this.userreqsec
+          )
+          .subscribe((response) => {
+            console.log(response);
+            if (response.message == 'success') {
+              this.toastr.success('Data Updated Sucessfully');
+              this.getData();
+            } else if (response.message == 'duplicate') {
+              this.toastr.warning('Student Already Exists');
+            }
+          });
+      }
+    });
+  }
+
   onSubmit() {
     console.log(this.myForm.get('mentor1').value);
     console.log(this.myForm.get('mentor2').value);

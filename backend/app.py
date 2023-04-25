@@ -146,5 +146,87 @@ def get_students():
     return jsonify(data), 200
 
 
+@app.route('/addStudent', methods=['POST'])
+def add_student():
+    user = request.json
+    name = user['name']
+    regno = user['regno']
+    mailid = user['mailid']
+    fatherno = user['fatherno']
+    motherno = user['motherno']
+    year = user['year']
+    section = user['section']
+    collection_name = f"{year}_{section}"
+    print(collection_name)
+    students_collection = mongo.db[collection_name]
+    year_section_mentor = students_collection.find_one(
+        {}, {'_id': 0, 'mentor1': 1, 'mentor2': 1, 'mentor3': 1})
+
+    mentor1 = year_section_mentor['mentor1']
+    mentor2 = year_section_mentor['mentor2']
+    mentor3 = year_section_mentor.get('mentor3', '')
+    existing_student = students_collection.find_one({'Register Number': regno})
+    if existing_student:
+        return jsonify({'message': 'duplicate'}), 201
+    first_record = students_collection.find_one()
+    common_fields = list(first_record.keys())
+
+    student_data = {}
+    student_data[common_fields[1]] = name
+    student_data[common_fields[2]] = regno
+    student_data[common_fields[3]] = mailid
+    student_data[common_fields[4]] = fatherno
+    student_data[common_fields[5]] = motherno
+    student_data[common_fields[6]] = year
+    student_data[common_fields[7]] = section
+    student_data[common_fields[8]] = mentor1
+    student_data[common_fields[9]] = mentor2
+    if mentor3:
+        student_data['mentor3'] = mentor3
+    students_collection.insert_one(student_data)
+    return jsonify({'message': 'success'}), 200
+
+
+@app.route('/editStudent', methods=['POST'])
+def edit_student():
+    user = request.json
+    name = user['name']
+    regno = user['regno']
+    mailid = user['mailid']
+    fatherno = user['fatherno']
+    motherno = user['motherno']
+    year = user['year']
+    section = user['section']
+    collection_name = f"{year}_{section}"
+    print(collection_name)
+    students_collection = mongo.db[collection_name]
+    year_section_mentor = students_collection.find_one(
+        {}, {'_id': 0, 'mentor1': 1, 'mentor2': 1, 'mentor3': 1})
+
+    mentor1 = year_section_mentor['mentor1']
+    mentor2 = year_section_mentor['mentor2']
+    mentor3 = year_section_mentor.get('mentor3', '')
+    existing_student = students_collection.find_one({'Register Number': regno})
+    if existing_student:
+        first_record = students_collection.find_one()
+        common_fields = list(first_record.keys())
+
+        student_data = {}
+        student_data[common_fields[1]] = name
+        student_data[common_fields[2]] = regno
+        student_data[common_fields[3]] = mailid
+        student_data[common_fields[4]] = fatherno
+        student_data[common_fields[5]] = motherno
+        student_data[common_fields[6]] = year
+        student_data[common_fields[7]] = section
+        student_data[common_fields[8]] = mentor1
+        student_data[common_fields[9]] = mentor2
+        if mentor3:
+            student_data['mentor3'] = mentor3
+        students_collection.update_one(
+            {'Register Number': regno}, {'$set': student_data})
+        return jsonify({'message': 'success'}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
