@@ -1,1 +1,9 @@
-<p>faculty works!</p>
+<nav class="nav">
+  <div class="sec1">
+    <span class="title">Attendance Management ({{ username }})</span>
+  </div>
+  <div class="sec2">
+    <img [src]="url" alt="" (click)="toggleLogout()" />
+  </div>
+</nav>
+<button *ngIf="showLogout" class="logout" (click)="logout()">LogOut</button>

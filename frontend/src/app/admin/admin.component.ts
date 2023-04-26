@@ -185,28 +185,21 @@ export class AdminComponent implements OnInit {
     const popup = this.matdialog.open(PopupComponent, {
       width: '80%',
       height: '420px',
-      enterAnimationDuration: '1000ms',
-      exitAnimationDuration: '1000ms',
+      enterAnimationDuration: '500ms',
+      exitAnimationDuration: '500ms',
       data: {
         current: 'Delete',
+        registerNumber: element.register_no,
       },
     });
     popup.afterClosed().subscribe((item) => {
       if (item.action == 'delete') {
         this.auth
-          .editStudent(
-            item.name,
-            item.registerNumber,
-            item.mail_id,
-            item.father_mobile_number,
-            item.mother_mobile_number,
-            this.userreqyear,
-            this.userreqsec
-          )
+          .deleteStudent(item.registerNumber, this.userreqyear, this.userreqsec)
           .subscribe((response) => {
             console.log(response);
             if (response.message == 'success') {
-              this.toastr.success('Data Updated Sucessfully');
+              this.toastr.success('Data Deleted Sucessfully');
               this.getData();
             } else if (response.message == 'duplicate') {
               this.toastr.warning('Student Already Exists');

@@ -72,6 +72,7 @@ export class HomeComponent implements OnInit {
                   sessionStorage.setItem('photo', this.user.photoUrl);
                   this.router.navigate(['admin']);
                 } else if (this.userType === 'faculty') {
+                  sessionStorage.setItem('email', this.user.email);
                   sessionStorage.setItem('user', this.userType.toUpperCase());
                   sessionStorage.setItem('name', this.user.firstName);
                   sessionStorage.setItem('photo', this.user.photoUrl);

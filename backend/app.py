@@ -228,5 +228,41 @@ def edit_student():
         return jsonify({'message': 'success'}), 200
 
 
+@app.route('/deleteStudent', methods=['POST'])
+def delete_student():
+    user = request.json
+    print(user)
+    year = user['year']
+    section = user['section']
+    regno = user['regno']
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    students_collection.delete_one({
+        "Register Number": regno})
+    return jsonify({'message': 'success'}), 200
+
+
+CORS(app)
+
+
+@app.route('/getFacultyData', methods=['POST'])
+def get_faculty_data():
+    user = request.json
+    email = user['email']
+    collections = mongo.db.list_collection_names()
+    print(collections)
+
+    for collection in collections:
+        document = mongo.db[collection].find_one()
+        if (document):
+            if email in [document.get("mentor1"), document.get("mentor2"), document.get("mentor3")]:
+                year = document.get("year")
+                section = document.get("section")
+                return jsonify({"year": year, "section": section, "message": "Got"}), 200
+            else:
+                return jsonify({'message': 'no'}), 200
+# return the results as a JSON response
+
+
 if __name__ == '__main__':
     app.run(debug=True)

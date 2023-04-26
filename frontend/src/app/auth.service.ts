@@ -74,4 +74,19 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/editStudent`, data);
   }
+  deleteStudent(regno: any, year: any, sec: any) {
+    const data = {
+      regno: regno,
+      year: year,
+      section: sec,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/deleteStudent`, data);
+  }
+
+  getFacultyData(email: any) {
+    const data = {
+      email: email,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getFacultyData`, data);
+  }
 }

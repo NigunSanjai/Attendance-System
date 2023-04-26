@@ -10,6 +10,8 @@ export class PopupComponent {
   result!: any;
   showAdd = false;
   showEdit = false;
+  showDelete = false;
+  deleno = '';
   studentData = {
     name: '',
     registerNumber: '',
@@ -26,6 +28,10 @@ export class PopupComponent {
     mother_mobile_number: '',
     action: '',
   };
+  deleteData = {
+    action: '',
+    registerNumber: '',
+  };
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private Ref: MatDialogRef<PopupComponent>,
@@ -40,6 +46,10 @@ export class PopupComponent {
     if (this.result.current == 'Edit') {
       this.editData = this.result;
       this.showEdit = true;
+    }
+    if (this.result.current == 'Delete') {
+      this.showDelete = true;
+      this.deleteData.registerNumber = this.result.registerNumber;
     }
   }
 
@@ -76,5 +86,9 @@ export class PopupComponent {
     } else {
       this.toastr.error('Invalid input');
     }
+  }
+  deleteSubmit() {
+    this.deleteData.action = 'delete';
+    this.Ref.close(this.deleteData);
   }
 }
