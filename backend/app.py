@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS, cross_origin
 from flask_pymongo import PyMongo
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -92,9 +93,11 @@ def upload_file():
         student['section'] = section
         student['mentor1'] = mentor1
         student['mentor2'] = mentor2
+
         if (mentor3):
             student['mentor3'] = mentor3
         student_data.append(student)
+        student['Date'] = {}
         # Create collection named after year and section
 
     existing_collection = mongo.db.get_collection(f'{year}_{section}', None)
@@ -262,6 +265,138 @@ def get_faculty_data():
             else:
                 return jsonify({'message': 'no'}), 200
 # return the results as a JSON response
+
+
+@app.route('/getattendance', methods=['POST'])
+def get_attendance():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    date = user['date']
+    if (date == ""):
+        return jsonify({"message": "nodate"}), 200
+
+    collection_name = f"{year}_{section}"
+    collection = mongo.db[collection_name]
+    attendance_records = collection.find(
+        {}, {'Name of the Student': 1, 'Register Number': 1, 'Date': 1})
+    data = []
+    for record in attendance_records:
+        name = record['Name of the Student']
+        reg_no = record['Register Number']
+        date_dict = record.get('Date', {})
+        if date not in date_dict:
+            date_dict[date] = [0] * 7
+            collection.update_one({'Register Number': record['Register Number']}, {
+                                  '$set': {'Date': date_dict}})
+        attendance = date_dict.get(date)
+        data.append({
+            'name': name,
+            'reg_no': reg_no,
+            'attendance': attendance,
+
+        })
+        sorted_date = record.get('Date', {})
+        sorted_keys = sorted(sorted_date.keys(),
+                             key=lambda x: datetime.strptime(x, '%b %d, %Y'))
+        sorted_dict = {}
+        for key in sorted_keys:
+            sorted_dict[key] = date_dict[key]
+        print(sorted_dict)
+        collection.update_one({'Register Number': record['Register Number']}, {
+            '$set': {'Date': sorted_dict}})
+    total_students = 0
+    forenoon_present = 0
+    forenoon_absent = 0
+    forenoon_onduty = 0
+    afternoon_onduty = 0
+    afternoon_present = 0
+    afternoon_absent = 0
+    atten_det = []
+    for record in collection.find():
+        total_students += 1
+        date_dict = record['Date']
+        arr = date_dict[date]
+        if all(x == 1 for x in arr[:4]):
+            forenoon_present += 1
+        else:
+            forenoon_absent += 1
+
+        if all(x == 1 for x in arr[4:]):
+            afternoon_present += 1
+        else:
+            afternoon_absent += 1
+        if all(x == 0.5 for x in arr[:4]):
+            forenoon_onduty += 1
+            forenoon_absent -= 1
+        if all(x == 0.5 for x in arr[4:]):
+            afternoon_onduty += 1
+            afternoon_absent -= 1
+    atten_det.append({
+        'total': total_students,
+        'fnp': forenoon_present,
+        'fna': forenoon_absent,
+        'anp': afternoon_present,
+        'ana': afternoon_absent,
+        'fond': forenoon_onduty,
+        'aond': afternoon_onduty
+
+    })
+    print(atten_det)
+    return jsonify({"data": data, "atten_det": atten_det}), 200
+
+
+@app.route('/updateattendance', methods=['POST'])
+def update_attendance():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    regno = user['regno']
+    date = user['date']
+    attendance = user['attendance']
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    students_collection.update_one(
+        {'Register Number': regno}, {'$set': {f"Date.{date}": attendance}})
+    atten_det = []
+    total_students = 0
+    forenoon_present = 0
+    forenoon_absent = 0
+    forenoon_onduty = 0
+    afternoon_onduty = 0
+    afternoon_present = 0
+    afternoon_absent = 0
+    for record in students_collection.find():
+        total_students += 1
+        date_dict = record['Date']
+        arr = date_dict[date]
+        if all(x == 1 for x in arr[:4]):
+            forenoon_present += 1
+        else:
+            forenoon_absent += 1
+
+        if all(x == 1 for x in arr[4:]):
+            afternoon_present += 1
+
+        else:
+            afternoon_absent += 1
+        if all(x == 0.5 for x in arr[:4]):
+            forenoon_onduty += 1
+            forenoon_absent -= 1
+        if all(x == 0.5 for x in arr[4:]):
+            afternoon_onduty += 1
+            afternoon_absent -= 1
+    atten_det.append({
+        'total': total_students,
+        'fnp': forenoon_present,
+        'fna': forenoon_absent,
+        'anp': afternoon_present,
+        'ana': afternoon_absent,
+        'fond': forenoon_onduty,
+        'aond': afternoon_onduty
+
+    })
+    return jsonify({'atten_det': atten_det}), 200
 
 
 if __name__ == '__main__':

@@ -89,4 +89,28 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getFacultyData`, data);
   }
+  getattendance(year: any, section: any, date: any) {
+    const data = {
+      year: year,
+      section: section,
+      date: date,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getattendance`, data);
+  }
+  updateattendance(
+    year: any,
+    section: any,
+    regno: any,
+    date: any,
+    attendance: any
+  ) {
+    const data = {
+      year: year,
+      section: section,
+      regno: regno,
+      date: date,
+      attendance: attendance,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/updateattendance`, data);
+  }
 }

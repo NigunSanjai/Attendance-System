@@ -39,3 +39,58 @@
   border-radius: 50%;
   width: 3rem;
 }
+.logout {
+  position: absolute;
+  right: 15px;
+  top: 70px;
+  width: 80px;
+  height: 40px;
+  border-radius: 10px;
+  background: transparent;
+  color: white;
+  font-weight: bold;
+}
+.mainflex {
+  display: flex;
+  height: 70%;
+  margin-top: 3.6rem;
+  gap: 5rem;
+}
+.sidenav {
+  margin-left: 1rem;
+  flex-basis: 20%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.sn {
+  width: 200px;
+  height: 50px;
+  color: white;
+  border: 5px solid white;
+  border-radius: 5px;
+  text-align: center;
+}
+.sn p {
+  margin-top: 10px;
+}
+.main-section {
+  position: relative;
+  flex-basis: 80%;
+  margin-right: 40px;
+}
+.dashboard {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+}
+.add-edit {
+  background-color: red;
+  width: 100%;
+  height: 100%;
+}
