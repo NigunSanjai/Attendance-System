@@ -9,11 +9,52 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatDatepicker } from '@angular/material/datepicker';
+
+import { ViewEncapsulation } from '@angular/core';
+
+import {
+  MomentDateAdapter,
+  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
+} from '@angular/material-moment-adapter';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+} from '@angular/material/core';
+
+import * as _moment from 'moment';
+import { default as _rollupMoment, Moment } from 'moment';
+
+const moment = _rollupMoment || _moment;
+
+export const MY_FORMATS = {
+  parse: {
+    dateInput: 'DD/MM/YYYY',
+  },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
+export const MY_DATE_FORMAT = 'MM/YYYY';
 
 @Component({
   selector: 'app-faculty',
   templateUrl: './faculty.component.html',
   styleUrls: ['./faculty.component.css'],
+  providers: [
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+
+    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
+  ],
+  encapsulation: ViewEncapsulation.None,
 })
 export class FacultyComponent {
   username = sessionStorage.getItem('user');
@@ -23,19 +64,21 @@ export class FacultyComponent {
   showDash = true;
   showae = false;
   decide = false;
-  pageSize = 5;
-  pageIndex = 0;
-  pageEvent: PageEvent;
   displayedColumns: string[] = [
     'Name of the Student',
     'Register Number',
     'Forenoon',
     'Afternoon',
   ];
+  displayedAttendancecolumns: string[];
+  attendancedataSource: any;
+  columns: string[] = [];
+  months: string[] = [];
   attendance_data: any;
-  forenoonChecked = false;
-  afternoonChecked = false;
+  // forenoonChecked = false;
+  // afternoonChecked = false;
   showTable = false;
+  showmt = false;
   currentDate: Date = new Date();
   options: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -62,6 +105,15 @@ export class FacultyComponent {
   @ViewChild(MatPaginator) paginatior!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
   dataSource: any;
+  dateType: any;
+  endDate = new FormControl(moment());
+  startDate = new FormControl(moment());
+  selectsType: boolean;
+  selecteType: boolean;
+  MY_DATE_FORMAT = 'MM/YYYY';
+  displayDate: any;
+  startMonth: any;
+  endMonth: any;
 
   constructor(
     private authService: SocialAuthService,
@@ -73,9 +125,12 @@ export class FacultyComponent {
     this.minDate = new Date();
     this.minDate.setDate(this.minDate.getDate() - 2);
     this.maxDate = new Date();
+    this.displayedAttendancecolumns = [];
   }
 
   ngOnInit() {
+    this.showmt = false;
+    sessionStorage.setItem('notloggedin', 'false');
     if (!sessionStorage.getItem('section') && !sessionStorage.getItem('year')) {
       this.auth
         .getFacultyData(sessionStorage.getItem('email'))
@@ -89,6 +144,7 @@ export class FacultyComponent {
         });
     }
     this.dataSource = new MatTableDataSource([]);
+    this.attendancedataSource = new MatTableDataSource([]);
   }
 
   toggleLogout() {
@@ -124,6 +180,7 @@ export class FacultyComponent {
     console.log(this.selectedDate);
   }
   getattendance() {
+    this.selectedDate = moment(this.selectedDate).format('MMM DD, YYYY');
     this.auth
       .getattendance(
         sessionStorage.getItem('year'),
@@ -209,26 +266,7 @@ export class FacultyComponent {
       attendance: row.attendance,
     });
   }
-  // masterToggle(column: string, event: any) {
-  //   if (column === 'forenoon') {
-  //     this.forenoonChecked = event.checked;
-  //   } else if (column === 'afternoon') {
-  //     this.afternoonChecked = event.checked;
-  //   }
-  //   this.dataSource.filteredData.forEach(
-  //     (row: any) => (row[column] = event.checked)
-  //   );
-  //   console.log(
-  //     this.dataSource.filteredData.map((row: any) => {
-  //       return {
-  //         name: row.name,
-  //         regno: row.reg_no,
-  //         forenoon: row.forenoon,
-  //         afternoon: row.afternoon,
-  //       };
-  //     })
-  //   );
-  // }
+
   masterToggle(type: string, event: MatCheckboxChange) {
     const isForenoon = type;
     const checked = event.checked ? 1 : 0;
@@ -261,18 +299,7 @@ export class FacultyComponent {
       console.log(row.attendance);
     });
   }
-  // checkAll(type: string, event: any) {
-  //   const checked = event.checked;
-  //   if (type === 'forenoon') {
-  //     this.dataSource.filteredData.forEach((row: any) => {
-  //       row.forenoon = checked;
-  //     });
-  //   } else if (type === 'afternoon') {
-  //     this.dataSource.filteredData.forEach((row: any) => {
-  //       row.afternoon = checked;
-  //     });
-  //   }
-  // }
+
   checkForenoonAttendance(row: any, event: any): boolean {
     const checked = event.checked;
     if (row.attendance.slice(0, 4).every((a: number) => a === 1)) {
@@ -317,5 +344,76 @@ export class FacultyComponent {
   Filterchange(data: Event) {
     const value = (data.target as HTMLInputElement).value;
     this.dataSource.filter = value;
+  }
+
+  // DATA GETTING SECTION
+  // myDateFormat = (date: Date) => {
+  //   const formattedDate = moment(date).format(MY_DATE_FORMAT);
+  //   const currentDate = moment().format(MY_DATE_FORMAT);
+  //   return (
+  //     moment(formattedDate, MY_DATE_FORMAT, true).isValid() &&
+  //     formattedDate >= currentDate
+  //   );
+  // };
+  onAttSel() {
+    this.showmt = false;
+  }
+
+  onSelect() {
+    this.attendancedataSource = [];
+    this.columns = [];
+    this.months = [];
+    this.showmt = false;
+    this.startMonth = sessionStorage.getItem('sm');
+    this.endMonth = sessionStorage.getItem('em');
+    if (this.dateType === 'month') {
+      // handle startMonth and endMonth
+      console.log(`Selected months: ${this.startMonth}, ${this.endMonth}`);
+      this.auth
+        .getmonthattendance(
+          sessionStorage.getItem('year'),
+          sessionStorage.getItem('section'),
+          this.startMonth,
+          this.endMonth
+        )
+        .subscribe((response: any) => {
+          if (response.message == 'nomonth') {
+            this.toastr.warning('No records found');
+          }
+          if (response.message == 'yes') {
+            this.showmt = true;
+            this.columns = ['Name', 'Register Number']; //
+            this.months = Object.keys(response.data[0])
+              .filter((key) => key !== 'name' && key !== 'RegisterNumber')
+              .sort((a, b) => Date.parse(`01 ${a}`) - Date.parse(`01 ${b}`));
+            this.columns.push(...this.months);
+
+            // console.log(this.attendancedataSource);
+            // this.columns = ['Name', 'Register Number']; //
+            // for (const key in response.data[0]) {
+            //   if (key !== 'name' && key !== 'RegisterNumber') {
+            //     this.columns.push(key);
+            //     this.months.push(key);
+            //   }
+
+            this.attendancedataSource = new MatTableDataSource([]);
+            this.attendancedataSource = new MatTableDataSource(response.data);
+            this.attendancedataSource.sort = this.sort;
+            this.cdr.detectChanges();
+            this.attendancedataSource.paginator = this.paginatior;
+
+            console.log(this.attendancedataSource);
+            console.log(this.columns);
+            console.log(this.months);
+          }
+        });
+    } else {
+      // handle startDate and endDate
+      console.log(
+        `Selected dates: ${this.startDate.value.format(
+          'MMM DD, YYYY'
+        )}, ${this.endDate.value.format('MMM DD, YYYY')}`
+      );
+    }
   }
 }

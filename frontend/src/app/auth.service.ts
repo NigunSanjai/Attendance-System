@@ -113,4 +113,13 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/updateattendance`, data);
   }
+  getmonthattendance(year: any, section: any, startmonth: any, endmonth: any) {
+    const data = {
+      year: year,
+      section: section,
+      startmonth: startmonth,
+      endmonth: endmonth,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getmonthattendance`, data);
+  }
 }

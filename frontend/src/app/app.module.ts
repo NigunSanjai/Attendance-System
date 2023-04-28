@@ -40,6 +40,7 @@ import { PopupComponent } from './popup/popup.component';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MonthCalenderComponent } from './month-calender/month-calender.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,6 +49,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     StudentComponent,
     HomeComponent,
     PopupComponent,
+    MonthCalenderComponent,
   ],
   imports: [
     BrowserModule,
