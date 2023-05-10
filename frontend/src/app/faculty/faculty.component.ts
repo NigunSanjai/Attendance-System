@@ -72,6 +72,7 @@ export class FacultyComponent {
   ];
   displayedAttendancecolumns: string[];
   attendancedataSource: any;
+  daywisedataSource: any;
   columns: string[] = [];
   months: string[] = [];
   attendance_data: any;
@@ -114,6 +115,7 @@ export class FacultyComponent {
   displayDate: any;
   startMonth: any;
   endMonth: any;
+  workingdays: any;
 
   constructor(
     private authService: SocialAuthService,
@@ -384,9 +386,19 @@ export class FacultyComponent {
             this.showmt = true;
             this.columns = ['Name', 'Register Number']; //
             this.months = Object.keys(response.data[0])
-              .filter((key) => key !== 'name' && key !== 'RegisterNumber')
+              .filter(
+                (key) =>
+                  key !== 'name' &&
+                  key !== 'RegisterNumber' &&
+                  key !== 'working_days' &&
+                  key !== 'total_present' &&
+                  key !== 'total_absent' &&
+                  key !== 'total_onduty' &&
+                  key !== 'percentage'
+              )
               .sort((a, b) => Date.parse(`01 ${a}`) - Date.parse(`01 ${b}`));
             this.columns.push(...this.months);
+            this.columns.push('Cumulative');
 
             // console.log(this.attendancedataSource);
             // this.columns = ['Name', 'Register Number']; //
@@ -408,7 +420,6 @@ export class FacultyComponent {
           }
         });
     } else {
-      // handle startDate and endDate
       console.log(
         `Selected dates: ${this.startDate.value.format(
           'MMM DD, YYYY'

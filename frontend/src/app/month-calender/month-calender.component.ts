@@ -47,12 +47,14 @@ export const MY_FORMATS = {
   encapsulation: ViewEncapsulation.None,
 })
 export class MonthCalenderComponent {
-  public startMonth = new FormControl(moment());
-  public endMonth = new FormControl(moment());
+  public startMonth = new FormControl(null);
+  public endMonth = new FormControl(null);
   setMonthAndYear1(
     normalizedMonthAndYear: Moment,
     datepicker: MatDatepicker<Moment>
   ) {
+    this.startMonth = new FormControl(moment());
+
     const ctrlValue = this.startMonth.value!;
     ctrlValue.month(normalizedMonthAndYear.month());
     ctrlValue.year(normalizedMonthAndYear.year());
@@ -64,6 +66,7 @@ export class MonthCalenderComponent {
     normalizedMonthAndYear: Moment,
     datepicker: MatDatepicker<Moment>
   ) {
+    this.endMonth = new FormControl(moment());
     const ctrlValue = this.endMonth.value!;
     ctrlValue.month(normalizedMonthAndYear.month());
     ctrlValue.year(normalizedMonthAndYear.year());

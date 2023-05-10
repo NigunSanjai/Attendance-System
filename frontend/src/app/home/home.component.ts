@@ -35,14 +35,16 @@ export class HomeComponent implements OnInit {
           // Admin email starts with 'admin'
           this.userType = 'admin';
           this.toastr.success('Welcome Admin');
-        } else if (
-          this.user.email.match(/^\d+/) &&
-          this.user.email.endsWith('@kpriet.ac.in')
-        ) {
-          // Student email starts with a number
-          this.userType = 'student';
-          this.toastr.success('Welcome student');
-        } else if (
+        }
+        //  else if (
+        //   this.user.email.match(/^\d+/) &&
+        //   this.user.email.endsWith('@kpriet.ac.in')
+        // ) {
+        //   // Student email starts with a number
+        //   this.userType = 'student';
+        //   this.toastr.success('Welcome student');
+        // }
+        else if (
           this.user.email.match(/^[a-zA-Z]/) &&
           this.user.email.endsWith('@kpriet.ac.in')
         ) {
