@@ -8,7 +8,6 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 import { ToastrModule } from 'ngx-toastr';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
@@ -41,6 +40,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MonthCalenderComponent } from './month-calender/month-calender.component';
+import { MatTableExporterModule } from 'mat-table-exporter';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -83,6 +84,7 @@ import { MonthCalenderComponent } from './month-calender/month-calender.componen
     MatGridListModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTableExporterModule,
   ],
   providers: [
     {

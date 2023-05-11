@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS, cross_origin
 from flask_pymongo import PyMongo
 from datetime import datetime
-from dateutil.rrule import rrule, MONTHLY
+from dateutil.rrule import rrule, MONTHLY, DAILY
 app = Flask(__name__)
 
 # Configure the JWT manager with the secret key
@@ -408,7 +408,6 @@ def get_month_attendance():
     section = user['section']
     start_month_str = user["startmonth"]
     end_month_str = user["endmonth"]
-
     # print(start_month_str)
     # print(end_month_str)
     collection_name = f"{year}_{section}"
@@ -516,6 +515,87 @@ def get_month_attendance():
 
     # print(month_attendance)
     return jsonify({'message': "yes", "data": month_attendance}), 200
+
+
+@app.route('/getdateattendance', methods=['POST'])
+def get_date_attendance():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    start_date_str = user["startdate"]
+    end_date_str = user["enddate"]
+
+    # print(start_month_str)
+    # print(end_month_str)
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    start_date = datetime.strptime(start_date_str, '%d %b %Y')
+    end_date = datetime.strptime(end_date_str, '%d %b %Y')
+    start_date_str = datetime.strftime(start_date, '%d %b %Y')
+    end_date_str = datetime.strftime(end_date, '%d %b %Y')
+    # print(start_month_str)
+    # print(end_month_str)
+    date_attendance = []
+    student_collection = students_collection.find()
+    total_days = 0
+    for student in student_collection:
+        total_present = 0
+        total_onduty = 0
+        total_absent = 0
+        # Extract the month and year from the first date in the record
+        start_date = datetime.strptime(start_date_str, '%d %b %Y')
+        end_date = datetime.strptime(end_date_str, '%d %b %Y')
+
+# Extract the month and year from the first date in the record
+        first_date = datetime.strptime(
+            list(student['Date'].keys())[0], '%b %d, %Y')
+        first_month_year = datetime.strftime(first_date, '%b %Y')
+
+# Extract the month and year from the last date in the record
+        last_date = datetime.strptime(
+            list(student['Date'].keys())[-1], '%b %d, %Y')
+        last_month_year = datetime.strftime(last_date, '%b %Y')
+        if start_date < first_date or end_date > last_date or start_date > last_date or end_date < first_date:
+            if (end_date > last_date):
+                end_date = last_date
+            print("yes")
+            return jsonify({"message": "nomonth"}), 200
+
+        else:
+
+            student_attendance = {
+                'name': student['Name of the Student'], 'RegisterNumber': student['Register Number']}
+            attendance_info = {
+            }
+            for dt in rrule(DAILY, dtstart=start_date, until=end_date):
+                date_str = dt.strftime('%b %d, %Y')
+                attendance = student['Date'].get(date_str)
+                if attendance:
+                    forenoon_attendance = attendance[:4]
+                    afternoon_attendance = attendance[4:]
+                    f_p_c = forenoon_attendance.count(1)
+                    f_a_c = forenoon_attendance.count(0)
+                    f_o_c = forenoon_attendance.count(0.5)
+                    a_p_c = afternoon_attendance.count(1)
+                    a_a_c = afternoon_attendance.count(0)
+                    a_o_c = afternoon_attendance.count(0.5)
+                    if f_p_c == 4:
+                        attendance_info['forenoon'] = "Present"
+                    elif f_a_c == 4:
+                        attendance_info['forenoon'] = "Absent"
+                    elif f_o_c == 4:
+                        attendance_info['forenoon'] = "On-Duty"
+                    if a_p_c == 3:
+                        attendance_info['afternoon'] = "Present"
+                    elif a_a_c == 3:
+                        attendance_info['afternoon'] = "Absent"
+                    elif a_o_c == 3:
+                        attendance_info['afternoon'] = "On-Duty"
+                    student_attendance[date_str] = attendance_info
+            date_attendance.append(student_attendance)
+    print(date_attendance)
+    return jsonify({'message': "yes", "data": date_attendance
+                    }), 200
 
 
 if __name__ == '__main__':

@@ -10,8 +10,12 @@ import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatDatepicker } from '@angular/material/datepicker';
-
+import { Exporter, MatTableExporterModule } from 'mat-table-exporter';
+import { MAT_TABLE_EXPORTER } from 'mat-table-exporter';
+import { MatTableExporterDirective } from 'mat-table-exporter';
 import { ViewEncapsulation } from '@angular/core';
+import { ElementRef } from '@angular/core';
+import * as XLSX from 'xlsx';
 
 import {
   MomentDateAdapter,
@@ -75,11 +79,14 @@ export class FacultyComponent {
   daywisedataSource: any;
   columns: string[] = [];
   months: string[] = [];
+  dcolumns: string[] = [];
+  ddates: string[] = [];
   attendance_data: any;
   // forenoonChecked = false;
   // afternoonChecked = false;
   showTable = false;
   showmt = false;
+  showdt = false;
   currentDate: Date = new Date();
   options: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -109,6 +116,8 @@ export class FacultyComponent {
   dateType: any;
   endDate = new FormControl(moment());
   startDate = new FormControl(moment());
+  sD: any;
+  eD: any;
   selectsType: boolean;
   selecteType: boolean;
   MY_DATE_FORMAT = 'MM/YYYY';
@@ -359,6 +368,7 @@ export class FacultyComponent {
   // };
   onAttSel() {
     this.showmt = false;
+    this.showdt = false;
   }
 
   onSelect() {
@@ -366,6 +376,7 @@ export class FacultyComponent {
     this.columns = [];
     this.months = [];
     this.showmt = false;
+    this.showdt = false;
     this.startMonth = sessionStorage.getItem('sm');
     this.endMonth = sessionStorage.getItem('em');
     if (this.dateType === 'month') {
@@ -384,6 +395,7 @@ export class FacultyComponent {
           }
           if (response.message == 'yes') {
             this.showmt = true;
+            this.showdt = false;
             this.columns = ['Name', 'Register Number']; //
             this.months = Object.keys(response.data[0])
               .filter(
@@ -398,7 +410,11 @@ export class FacultyComponent {
               )
               .sort((a, b) => Date.parse(`01 ${a}`) - Date.parse(`01 ${b}`));
             this.columns.push(...this.months);
-            this.columns.push('Cumulative');
+            // this.columns.push('Forenoon');
+            this.columns.push('Cumulative Present');
+            this.columns.push('Cumulative Absent');
+            this.columns.push('Cumulative On_Duty');
+            this.columns.push('Cumulative Percentage');
 
             // console.log(this.attendancedataSource);
             // this.columns = ['Name', 'Register Number']; //
@@ -419,6 +435,53 @@ export class FacultyComponent {
             console.log(this.months);
           }
         });
+    }
+    if (this.dateType === 'day') {
+      // handle startMonth and endMonth
+      this.sD = this.startDate.value.format('DD MMM YYYY');
+      this.eD = this.endDate.value.format('DD MMM YYYY');
+      console.log(this.sD, this.eD);
+      this.auth
+        .getdateattendance(
+          sessionStorage.getItem('year'),
+          sessionStorage.getItem('section'),
+          this.sD,
+          this.eD
+        )
+        .subscribe((response: any) => {
+          if (response.message == 'nomonth') {
+            this.toastr.warning('No records found');
+          }
+          if (response.message == 'yes') {
+            this.showdt = true;
+            this.showmt = false;
+            this.dcolumns = ['Name', 'Register Number']; //
+            console.log(response.data);
+            this.ddates = Object.keys(response.data[0])
+              .filter(
+                (key) =>
+                  key !== 'name' &&
+                  key !== 'RegisterNumber' &&
+                  key !== 'working_days' &&
+                  key !== 'total_present' &&
+                  key !== 'total_absent' &&
+                  key !== 'total_onduty' &&
+                  key !== 'percentage'
+              )
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            this.dcolumns.push(...this.ddates);
+
+            this.daywisedataSource = new MatTableDataSource([]);
+            this.daywisedataSource = new MatTableDataSource(response.data);
+            this.daywisedataSource.sort = this.sort;
+            this.cdr.detectChanges();
+            this.daywisedataSource.paginator = this.paginatior;
+
+            console.log(this.daywisedataSource);
+            console.log(this.dcolumns);
+            console.log(this.ddates);
+          }
+        });
     } else {
       console.log(
         `Selected dates: ${this.startDate.value.format(
@@ -427,4 +490,25 @@ export class FacultyComponent {
       );
     }
   }
+  getTableWidth() {
+    console.log(100 * this.columns.length + '%');
+    return 300 + this.months.length * 100 + '%';
+  }
+  @ViewChild('TABLE') table: ElementRef;
+  exportAsExcel() {
+    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(
+      this.table.nativeElement
+    ); //converts a DOM TABLE element to a worksheet
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    /* save to file */
+    XLSX.writeFile(wb, 'SheetJS.xlsx');
+  }
+  // // @ViewChild(MatTableExporterDirective) exporter: MatTableExporterDirective;
+  // // exportTable() {
+  // //   this.exporter.exportTable('csv', {
+  // //     fileName: 'attendance-data',
+  // //   });
+  // }
 }

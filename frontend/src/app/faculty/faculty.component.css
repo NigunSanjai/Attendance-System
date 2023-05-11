@@ -6,8 +6,9 @@
 
 .main {
   position: relative;
+  overflow: auto;
   width: 100%;
-  height: 120vh;
+  height: 100vh;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url(../../assets/KPRIET.fd66c253.jpg);
   background-size: cover;
@@ -87,7 +88,7 @@
   flex-direction: column;
 
   width: 100%;
-  height: 100%;
+  height: 120%;
 }
 .add-edit {
   width: 100%;
@@ -95,7 +96,7 @@
   display: flex;
   flex-direction: column;
 }
-.mt table {
+/* .mt table {
   border-collapse: collapse;
   width: 100%;
 }
@@ -131,4 +132,33 @@
 .mt .afternoon span {
   display: block;
   margin-bottom: 5px;
+} */
+/* .mat-header-cell {
+  text-align: center;
+}
+
+.attendance-info {
+  display: flex;
+  justify-content: center;
+}
+
+.forenoon,
+.afternoon {
+  margin: 0 10px;
+}
+
+.cumulative {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cumulative p {
+  margin: 5px;
+} */
+.matcell table,
+.matcell th,
+.matcell td {
+  border: 1px solid black;
+  border-collapse: collapse;
 }

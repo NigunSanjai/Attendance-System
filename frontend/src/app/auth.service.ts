@@ -122,4 +122,13 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getmonthattendance`, data);
   }
+  getdateattendance(year: any, section: any, startdate: any, enddate: any) {
+    const data = {
+      year: year,
+      section: section,
+      startdate: startdate,
+      enddate: enddate,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getdateattendance`, data);
+  }
 }
