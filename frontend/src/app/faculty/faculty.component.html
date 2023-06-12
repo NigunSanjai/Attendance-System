@@ -240,300 +240,57 @@
           </div>
 
           <!-- MONTH TABLE -->
-          <div
-            *ngIf="showmt"
-            style="width: 1000px; height: 100%; overflow: auto"
-            class="mt"
-            #TABLE
-          >
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="exporter.exportTable('xlsx')"
-            >
-              Export as Excel
-            </button>
-            <mat-table
-              [dataSource]="attendancedataSource"
-              class="mat-elevation-z8"
-              style="
-                text-align: center;
-                width: 100%;
-                height: 65vh;
-                overflow: auto;
-              "
-              id="table"
-              matTableExporter
-              #table
-              #exporter="matTableExporter"
-            >
-              <!-- Name Column -->
-              <ng-container matColumnDef="Name">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="
-                    text-align: center;
-                    justify-content: center;
-                    width: 100px;
-                  "
-                >
-                  Name
-                </mat-header-cell>
-                <mat-cell
-                  style="text-align: center; justify-content: center"
-                  *matCellDef="let element"
-                >
-                  {{ element.name }}
-                </mat-cell>
-              </ng-container>
 
-              <!-- Register Number Column -->
-              <ng-container matColumnDef="Register Number">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; justify-content: center"
-                >
-                  Register Number
-                </mat-header-cell>
-                <mat-cell
-                  mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; justify-content: center"
-                >
-                  {{ element.RegisterNumber }}
-                </mat-cell>
-              </ng-container>
+          <div *ngIf="showmt" style="height: 300px" class="ag-theme-alpine">
+            <div class="export-button-container">
+              <button
+                (click)="exportAsExcel()"
+                matTooltip="Eksport table to Excel document"
+                mat-raised-button
+              >
+                Export as Excel
+                <mat-icon>get_app</mat-icon>
+              </button>
+            </div>
 
-              <!-- Month Columns -->
-              <ng-container *ngFor="let month of months" [matColumnDef]="month">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="
-                    text-align: center;
-                    justify-content: center;
-                    width: 300% !important;
-                  "
-                >
-                  {{ month }}
-                </mat-header-cell>
-                <mat-cell
-                  class="matcell"
-                  *matCellDef="let element"
-                  style="
-                    text-align: center;
-                    justify-content: center;
-                    width: 300%;
-                  "
-                >
-                  <table>
-                    <thead>
-                      <tr>
-                        <th colspan="3">Forenoon</th>
-                        <th colspan="3">Afernoon</th>
-                      </tr>
-                      <tr>
-                        <th>Present</th>
-                        <th>Absent</th>
-                        <th style="white-space: nowrap">On-Duty</th>
-                        <th>Present</th>
-                        <th>Absent</th>
-                        <th>On-Duty</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>{{ element[month]?.forenoon?.present || 0 }}</td>
-                        <td>{{ element[month]?.forenoon?.absent || 0 }}</td>
-                        <td>{{ element[month]?.forenoon?.onduty || 0 }}</td>
-                        <td>{{ element[month]?.afternoon?.present || 0 }}</td>
-                        <td>{{ element[month]?.afternoon?.absent || 0 }}</td>
-                        <td>{{ element[month]?.afternoon?.onduty || 0 }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="Cumulative Present">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; justify-content: center"
-                >
-                  Cumulative Present
-                </mat-header-cell>
-                <mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; justify-content: center"
-                >
-                  <span> {{ element.total_present }}</span>
-                </mat-cell>
-              </ng-container>
-              <ng-container matColumnDef="Cumulative Absent">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; justify-content: center"
-                >
-                  Cumulative Absent
-                </mat-header-cell>
-                <mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; justify-content: center"
-                >
-                  <span> {{ element.total_absent }}</span>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="Cumulative On_Duty">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; justify-content: center"
-                >
-                  Cumulative On Duty
-                </mat-header-cell>
-                <mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; justify-content: center"
-                >
-                  <span> {{ element.total_onduty }}</span>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="Cumulative Percentage">
-                <mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; justify-content: center"
-                >
-                  Cumulative Percentage
-                </mat-header-cell>
-                <mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; justify-content: center"
-                >
-                  <span> {{ element.percentage }}</span>
-                </mat-cell>
-              </ng-container>
-
-              <mat-header-row
-                *matHeaderRowDef="columns"
-                [style.width]="getTableWidth()"
-              ></mat-header-row>
-              <mat-row
-                *matRowDef="let row; columns: columns"
-                [style.width]="getTableWidth()"
-              ></mat-row>
-            </mat-table>
+            <ag-grid-angular
+              #agGrid
+              style="width: 100%; height: 100%"
+              class="ag-theme-alpine"
+              [rowData]="rowData"
+              [columnDefs]="columnDefs"
+              [defaultColDef]="defaultColDef"
+              [pagination]="true"
+              [paginationPageSize]="10"
+              [gridOptions]="gridOptions"
+              (gridReady)="onGridReady($event)"
+            ></ag-grid-angular>
           </div>
           <!-- DAY TABLE -->
-          <div
-            *ngIf="showdt"
-            style="width: 100%; height: 100%; overflow: auto"
-            class="mt"
-          >
-            <table
-              mat-table
-              [dataSource]="daywisedataSource"
-              class="mat-elevation-z8"
-              style="overflow-x: auto; overflow-y: auto"
-            >
-              <!-- Name Column -->
-              <ng-container matColumnDef="Name">
-                <th
-                  mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; width: 500px"
-                >
-                  Name
-                </th>
-                <td
-                  style="text-align: center; width: 500px"
-                  *matCellDef="let element"
-                >
-                  {{ element.name }}
-                </td>
-              </ng-container>
-
-              <!-- Register Number Column -->
-              <ng-container matColumnDef="Register Number">
-                <th
-                  mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; width: 500px"
-                >
-                  Register Number
-                </th>
-                <td
-                  mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; width: 500px"
-                >
-                  {{ element.RegisterNumber }}
-                </td>
-              </ng-container>
-
-              <!-- Day Columns -->
-              <ng-container *ngFor="let date of ddates" [matColumnDef]="date">
-                <th
-                  mat-header-cell
-                  *matHeaderCellDef
-                  style="text-align: center; width: 500px"
-                >
-                  {{ date }}
-                </th>
-                <td
-                  mat-cell
-                  *matCellDef="let element"
-                  style="text-align: center; white-space: nowrap"
-                >
-                  <div>
-                    <span>Forenoon : {{ element[date].forenoon }} </span>
-                  </div>
-                  <div>
-                    <span>Afternoon : {{ element[date].afternoon }}</span>
-                  </div>
-                </td>
-              </ng-container>
-
-              <!-- <ng-container matColumnDef="Cumulative">
-              <th
-                mat-header-cell
-                *matHeaderCellDef
-                style="text-align: center; width: 500px"
+          <div *ngIf="showdt" style="height: 300px" class="ag-theme-alpine">
+            <div class="export-button-container">
+              <button
+                (click)="exportAsExcel()"
+                matTooltip="Eksport table to Excel document"
+                mat-raised-button
               >
-                Cumulative
-              </th>
-              <td
-                mat-cell
-                *matCellDef="let element"
-                style="text-align: center; width: 500px"
-              >
-                <div class="forenoon">
-                  <span>Total Present: {{ element.total_present }}</span>
-                  <span>Total Absent: {{ element.total_absent }}</span>
-                  <span>Total On duty: {{ element.total_onduty }}</span>
-                  <span>Percentage: {{ element.percentage }}</span>
-                </div>
-              </td>
-            </ng-container> -->
+                Export as Excel
+                <mat-icon>get_app</mat-icon>
+              </button>
+            </div>
 
-              <!-- Column to fill the remaining space -->
-              <!-- <ng-container matColumnDef="filler">
-            <td
-              mat-cell
-              *matCellDef="let element"
-              [attr.colspan]="columns.length - months.length - 2"
-            ></td>
-          </ng-container> -->
-
-              <tr mat-header-row *matHeaderRowDef="dcolumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: dcolumns"></tr>
-            </table>
-          </div>
-          <div>
-            <mat-paginator
-              *ngIf="showdt || showmt"
-              [pageSizeOptions]="[5, 10, 20, 40, 60]"
-              showFirstLastButtons
-            ></mat-paginator>
+            <ag-grid-angular
+              #agGrid
+              style="width: 100%; height: 100%"
+              class="ag-theme-alpine"
+              [rowData]="rowData"
+              [columnDefs]="columnDefs"
+              [defaultColDef]="defaultColDef"
+              [pagination]="true"
+              [paginationPageSize]="10"
+              [gridOptions]="gridOptions"
+              (gridReady)="onGridReady($event)"
+            ></ag-grid-angular>
           </div>
           <div></div>
         </div>

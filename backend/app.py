@@ -458,6 +458,9 @@ def get_month_attendance():
                 'name': student['Name of the Student'], 'RegisterNumber': student['Register Number']}
 
             for dt in rrule(MONTHLY, dtstart=start_month, until=end_month):
+                m_p = 0
+                m_a = 0
+                m_o = 0
                 month_year = dt.strftime('%b %Y')
                 attendance_info = {
                     'forenoon': {
@@ -482,29 +485,38 @@ def get_month_attendance():
                             if i < 4:
                                 if attendance == 1:
                                     total_present += 1
+                                    m_p += 1
                                     attendance_info['forenoon']['present'] += 1
                                 elif attendance == 0:
+                                    m_a += 1
                                     attendance_info['forenoon']['absent'] += 1
                                     total_absent += 1
                                 elif attendance == 0.5:
+                                    m_o += 1
                                     total_onduty += 1
                                     attendance_info['forenoon']['onduty'] += 1
                             else:
                                 if attendance == 1:
+                                    m_p += 1
                                     total_present += 1
                                     attendance_info['afternoon']['present'] += 1
                                 elif attendance == 0:
+                                    m_a += 1
                                     total_absent += 1
                                     attendance_info['afternoon']['absent'] += 1
                                 elif attendance == 0.5:
+                                    m_o += 1
                                     total_onduty += 1
                                     attendance_info['afternoon']['onduty'] += 1
                 student_attendance[month_year] = attendance_info
+                # student_attendance["Present(" + month_year + ")"] = m_p
+                # student_attendance["Absent(" + month_year + ")"] = m_a
+                # student_attendance["On-Duty(" + month_year + ")"] = m_o
                 working_days[month_year] = current_month
 
         total_days = ((total_present+total_absent+total_onduty)//7)
         percentage = round((total_present/(total_days*7))*100, 2)
-        print(total_days)
+
         student_attendance['working_days'] = working_days
         student_attendance['total_present'] = total_present
         student_attendance['total_absent'] = total_absent

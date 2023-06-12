@@ -41,7 +41,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MonthCalenderComponent } from './month-calender/month-calender.component';
 import { MatTableExporterModule } from 'mat-table-exporter';
-
+import { AgGridModule } from 'ag-grid-angular';
+import { ExcelExportModule } from 'ag-grid-enterprise';
 @NgModule({
   declarations: [
     AppComponent,
@@ -85,6 +86,7 @@ import { MatTableExporterModule } from 'mat-table-exporter';
     MatDatepickerModule,
     MatNativeDateModule,
     MatTableExporterModule,
+    AgGridModule,
   ],
   providers: [
     {

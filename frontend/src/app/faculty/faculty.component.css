@@ -3,6 +3,8 @@
   padding: 0;
   box-sizing: border-box;
 }
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-alpine.css";
 
 .main {
   position: relative;
@@ -161,4 +163,16 @@
 .matcell td {
   border: 1px solid black;
   border-collapse: collapse;
+}
+th.mat-header-cell,
+td.mat-cell {
+  text-align: center;
+  border: 1px solid #ccc;
+  padding: 0 !important;
+}
+
+.export-button-container {
+  margin: 24px 12px 24px auto;
+  display: flex;
+  justify-content: center;
 }

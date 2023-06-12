@@ -9,14 +9,22 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatDatepicker } from '@angular/material/datepicker';
-import { Exporter, MatTableExporterModule } from 'mat-table-exporter';
-import { MAT_TABLE_EXPORTER } from 'mat-table-exporter';
-import { MatTableExporterDirective } from 'mat-table-exporter';
+// import { MatDatepicker } from '@angular/material/datepicker';
+// import { Exporter, MatTableExporterModule } from 'mat-table-exporter';
+// import { MAT_TABLE_EXPORTER } from 'mat-table-exporter';
+// import { MatTableExporterDirective } from 'mat-table-exporter';
 import { ViewEncapsulation } from '@angular/core';
 import { ElementRef } from '@angular/core';
 import * as XLSX from 'xlsx';
-
+// import { saveAs } from 'file-saver';
+import { GridOptions } from 'ag-grid-community';
+import {
+  ColDef,
+  ColGroupDef,
+  GridApi,
+  GridReadyEvent,
+} from 'ag-grid-community';
+import 'ag-grid-enterprise';
 import {
   MomentDateAdapter,
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
@@ -29,6 +37,7 @@ import {
 
 import * as _moment from 'moment';
 import { default as _rollupMoment, Moment } from 'moment';
+import { filter } from 'rxjs';
 
 const moment = _rollupMoment || _moment;
 
@@ -74,6 +83,9 @@ export class FacultyComponent {
     'Forenoon',
     'Afternoon',
   ];
+  // rowData: any[];
+  // columnDefs: any[];
+  // defaultColDef: any;
   displayedAttendancecolumns: string[];
   attendancedataSource: any;
   daywisedataSource: any;
@@ -81,6 +93,7 @@ export class FacultyComponent {
   months: string[] = [];
   dcolumns: string[] = [];
   ddates: string[] = [];
+  details: string[] = [];
   attendance_data: any;
   // forenoonChecked = false;
   // afternoonChecked = false;
@@ -125,7 +138,12 @@ export class FacultyComponent {
   startMonth: any;
   endMonth: any;
   workingdays: any;
-
+  private gridApi!: GridApi;
+  public gridOptions: GridOptions = {};
+  public columnDefs: (ColDef | ColGroupDef)[] = [];
+  public defaultColDef: ColDef = {};
+  public rowData!: [];
+  private sortingOrder: any;
   constructor(
     private authService: SocialAuthService,
     private router: Router,
@@ -137,6 +155,30 @@ export class FacultyComponent {
     this.minDate.setDate(this.minDate.getDate() - 2);
     this.maxDate = new Date();
     this.displayedAttendancecolumns = [];
+    this.rowData = [];
+
+    this.columnDefs = [
+      {
+        headerName: 'Name',
+        field: 'name',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Register Number',
+        field: 'RegisterNumber',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+    ];
+
+    this.defaultColDef = {
+      flex: 1,
+      minWidth: 100,
+      resizable: true,
+    };
   }
 
   ngOnInit() {
@@ -396,46 +438,11 @@ export class FacultyComponent {
           if (response.message == 'yes') {
             this.showmt = true;
             this.showdt = false;
-            this.columns = ['Name', 'Register Number']; //
-            this.months = Object.keys(response.data[0])
-              .filter(
-                (key) =>
-                  key !== 'name' &&
-                  key !== 'RegisterNumber' &&
-                  key !== 'working_days' &&
-                  key !== 'total_present' &&
-                  key !== 'total_absent' &&
-                  key !== 'total_onduty' &&
-                  key !== 'percentage'
-              )
-              .sort((a, b) => Date.parse(`01 ${a}`) - Date.parse(`01 ${b}`));
-            this.columns.push(...this.months);
-            // this.columns.push('Forenoon');
-            this.columns.push('Cumulative Present');
-            this.columns.push('Cumulative Absent');
-            this.columns.push('Cumulative On_Duty');
-            this.columns.push('Cumulative Percentage');
-
-            // console.log(this.attendancedataSource);
-            // this.columns = ['Name', 'Register Number']; //
-            // for (const key in response.data[0]) {
-            //   if (key !== 'name' && key !== 'RegisterNumber') {
-            //     this.columns.push(key);
-            //     this.months.push(key);
-            //   }
-
-            this.attendancedataSource = new MatTableDataSource([]);
-            this.attendancedataSource = new MatTableDataSource(response.data);
-            this.attendancedataSource.sort = this.sort;
-            this.cdr.detectChanges();
-            this.attendancedataSource.paginator = this.paginatior;
-
-            console.log(this.attendancedataSource);
-            console.log(this.columns);
-            console.log(this.months);
+            this.processResponseData(response.data);
           }
         });
     }
+
     if (this.dateType === 'day') {
       // handle startMonth and endMonth
       this.sD = this.startDate.value.format('DD MMM YYYY');
@@ -455,31 +462,32 @@ export class FacultyComponent {
           if (response.message == 'yes') {
             this.showdt = true;
             this.showmt = false;
-            this.dcolumns = ['Name', 'Register Number']; //
-            console.log(response.data);
-            this.ddates = Object.keys(response.data[0])
-              .filter(
-                (key) =>
-                  key !== 'name' &&
-                  key !== 'RegisterNumber' &&
-                  key !== 'working_days' &&
-                  key !== 'total_present' &&
-                  key !== 'total_absent' &&
-                  key !== 'total_onduty' &&
-                  key !== 'percentage'
-              )
-              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-            this.dcolumns.push(...this.ddates);
+            // this.dcolumns = ['Name', 'Register Number']; //
+            // console.log(response.data);
+            // this.ddates = Object.keys(response.data[0])
+            //   .filter(
+            //     (key) =>
+            //       key !== 'name' &&
+            //       key !== 'RegisterNumber' &&
+            //       key !== 'working_days' &&
+            //       key !== 'total_present' &&
+            //       key !== 'total_absent' &&
+            //       key !== 'total_onduty' &&
+            //       key !== 'percentage'
+            //   )
+            //   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            // this.dcolumns.push(...this.ddates);
 
-            this.daywisedataSource = new MatTableDataSource([]);
-            this.daywisedataSource = new MatTableDataSource(response.data);
-            this.daywisedataSource.sort = this.sort;
-            this.cdr.detectChanges();
-            this.daywisedataSource.paginator = this.paginatior;
+            // this.daywisedataSource = new MatTableDataSource([]);
+            // this.daywisedataSource = new MatTableDataSource(response.data);
+            // this.daywisedataSource.sort = this.sort;
+            // this.cdr.detectChanges();
+            // this.daywisedataSource.paginator = this.paginatior;
 
-            console.log(this.daywisedataSource);
-            console.log(this.dcolumns);
-            console.log(this.ddates);
+            // console.log(this.daywisedataSource);
+            // console.log(this.dcolumns);
+            // console.log(this.ddates);
+            this.processDResponseData(response.data);
           }
         });
     } else {
@@ -496,15 +504,148 @@ export class FacultyComponent {
   }
   @ViewChild('TABLE') table: ElementRef;
   exportAsExcel() {
-    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(
-      this.table.nativeElement
-    ); //converts a DOM TABLE element to a worksheet
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-    /* save to file */
-    XLSX.writeFile(wb, 'SheetJS.xlsx');
+    const params = {
+      fileName: 'exportedData',
+    };
+    this.gridApi.exportDataAsExcel(params);
   }
+  onGridReady(params: any) {
+    this.gridApi = params.api;
+  }
+  processResponseData(data: any) {
+    // Process the dynamic data and update columnDefs
+    const months = Object.keys(data[0])
+      .filter(
+        (key) =>
+          key !== 'name' &&
+          key !== 'RegisterNumber' &&
+          key !== 'working_days' &&
+          key !== 'total_present' &&
+          key !== 'total_absent' &&
+          key !== 'total_onduty' &&
+          key !== 'percentage'
+      )
+      .sort((a, b) => Date.parse(`01 ${a}`) - Date.parse(`01 ${b}`));
+    console.log(months);
+
+    months.forEach((month) => {
+      const monthColumns = [
+        {
+          headerName: `Total Present`,
+          valueGetter: function (params: { data: { [x: string]: any } }) {
+            const rowData = params.data[month];
+            return rowData.forenoon.present + rowData.afternoon.present;
+          },
+        },
+        {
+          headerName: `Total Absent`,
+          valueGetter: function (params: { data: { [x: string]: any } }) {
+            const rowData = params.data[month];
+            return rowData.forenoon.absent + rowData.afternoon.absent;
+          },
+        },
+        {
+          headerName: `Total On-Duty`,
+          valueGetter: function (params: { data: { [x: string]: any } }) {
+            const rowData = params.data[month];
+            return rowData.forenoon.onduty + rowData.afternoon.onduty;
+          },
+        },
+      ];
+
+      this.columnDefs.push({
+        headerName: month,
+        children: monthColumns,
+        sortable: true,
+        filter: true,
+      });
+    });
+    this.columnDefs.push({
+      headerName: 'Total Present',
+      field: 'total_present',
+      sortable: true,
+      filter: true,
+    });
+    this.columnDefs.push({
+      headerName: 'Total Absent',
+      field: 'total_absent',
+      sortable: true,
+      filter: true,
+    });
+    this.columnDefs.push({
+      headerName: 'Total On-Duty',
+      field: 'total_onduty',
+      sortable: true,
+      filter: true,
+    });
+    this.columnDefs.push({
+      headerName: 'Percentage',
+      field: 'percentage',
+      sortable: true,
+      filter: true,
+    });
+
+    // Update rowData with the dynamic data
+    this.rowData = data;
+    console.log(this.rowData);
+  }
+  processDResponseData(data: any) {
+    // Process the dynamic data and update columnDefs
+    const months = Object.keys(data[0])
+      .filter(
+        (key) =>
+          key !== 'name' &&
+          key !== 'RegisterNumber' &&
+          key !== 'working_days' &&
+          key !== 'total_present' &&
+          key !== 'total_absent' &&
+          key !== 'total_onduty' &&
+          key !== 'percentage'
+      )
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    console.log(months);
+
+    months.forEach((month) => {
+      const monthColumns = [
+        {
+          headerName: `Forenoon`,
+          field: `${month}.forenoon`,
+        },
+        {
+          headerName: `Afternoon`,
+          field: `${month}.afternoon`,
+        },
+      ];
+
+      this.columnDefs.push({
+        headerName: month,
+        children: monthColumns,
+      });
+    });
+
+    // Update rowData with the dynamic data
+    this.rowData = data;
+    console.log(this.rowData);
+  }
+
+  // exportTable() {
+  //   const documentDefinition = this.exporter.generateExportedTable('pdf', {
+  //     fileName: 'attendance',
+  //     sheetName: 'Sheet1',
+  //     style: {
+  //       headerRow: {
+  //         fillColor: '#eeeeee',
+  //         bold: true,
+  //       },
+  //       contentCell: {
+  //         fillColor: '#ffffff',
+  //       },
+  //     },
+  //   });
+
+  //   pdfMake.createPdf(documentDefinition).download();
+  // }
+
   // // @ViewChild(MatTableExporterDirective) exporter: MatTableExporterDirective;
   // // exportTable() {
   // //   this.exporter.exportTable('csv', {
