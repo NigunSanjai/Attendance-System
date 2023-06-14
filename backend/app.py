@@ -267,8 +267,28 @@ def get_faculty_data():
 # return the results as a JSON response
 
 
+@app.route('/getStudentData', methods=['POST'])
+def get_student_data():
+    user = request.json
+    email = user['email']
+    collections = mongo.db.list_collection_names()
+    # print(collections)
+
+    for collection in collections:
+        document = mongo.db[collection]
+        result = document.find_one({"Official Mail ID (College)": email})
+        if (result):
+            year = result.get("year")
+            section = result.get("section")
+            print(year, section)
+            return jsonify({"year": year, "section": section, "message": "Got"}), 200
+        else:
+            return jsonify({'message': 'no'}), 200
+
+
 @app.route('/getattendance', methods=['POST'])
 def get_attendance():
+
     user = request.json
     year = user['year']
     section = user['section']
@@ -346,6 +366,131 @@ def get_attendance():
     })
     # print(atten_det)
     return jsonify({"data": data, "atten_det": atten_det}), 200
+
+
+@app.route('/recordattendance', methods=['POST'])
+def record_attendance():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    date = user['date']
+    ncollection = mongo.db["AdminAttendance"]
+    collection_name = f"{year}_{section}"
+    collection = mongo.db[collection_name]
+    attendance_records = collection.find(
+        {}, {'Name of the Student': 1, 'Register Number': 1, 'Date': 1})
+    data = []
+    for record in attendance_records:
+        name = record['Name of the Student']
+        reg_no = record['Register Number']
+        date_dict = record.get('Date', {})
+        if date not in date_dict:
+            date_dict[date] = [0] * 7
+            collection.update_one({'Register Number': record['Register Number']}, {
+                                  '$set': {'Date': date_dict}})
+        attendance = date_dict.get(date)
+        data.append({
+            'name': name,
+            'reg_no': reg_no,
+            'attendance': attendance,
+
+        })
+        sorted_date = record.get('Date', {})
+        # print(sorted_date)
+        sorted_keys = sorted(sorted_date.keys(),
+                             key=lambda x: datetime.strptime(x, '%b %d, %Y'))
+        sorted_dict = {}
+        for key in sorted_keys:
+            sorted_dict[key] = date_dict[key]
+        # print(sorted_dict)
+        collection.update_one({'Register Number': record['Register Number']}, {
+            '$set': {'Date': sorted_dict}})
+    total_students = 0
+    forenoon_present = 0
+    forenoon_absent = 0
+    forenoon_onduty = 0
+    afternoon_onduty = 0
+    afternoon_present = 0
+    afternoon_absent = 0
+    atten_det = []
+    for record in collection.find():
+        total_students += 1
+        date_dict = record['Date']
+        arr = date_dict[date]
+        if all(x == 1 for x in arr[:4]):
+            forenoon_present += 1
+        else:
+            forenoon_absent += 1
+
+        if all(x == 1 for x in arr[4:]):
+            afternoon_present += 1
+        else:
+            afternoon_absent += 1
+        if all(x == 0.5 for x in arr[:4]):
+            forenoon_onduty += 1
+            forenoon_absent -= 1
+        if all(x == 0.5 for x in arr[4:]):
+            afternoon_onduty += 1
+            afternoon_absent -= 1
+    atten_det.append({
+        'total': total_students,
+        'fnp': forenoon_present,
+        'fna': forenoon_absent,
+        'anp': afternoon_present,
+        'ana': afternoon_absent,
+        'fond': forenoon_onduty,
+        'aond': afternoon_onduty,
+    })
+    existing_record = ncollection.find_one({"Date": date})
+    if existing_record:
+        newf_data = []
+        newa_data = []
+        newf_data.append(atten_det[0]['total'])
+        newf_data.append(atten_det[0]['fnp'])
+        newf_data.append(atten_det[0]['fna'])
+        newf_data.append(atten_det[0]['fond'])
+        newa_data.append(atten_det[0]['total'])
+        newa_data.append(atten_det[0]['anp'])
+        newa_data.append(atten_det[0]['ana'])
+        newa_data.append(atten_det[0]['aond'])
+        existing_record[collection_name] = [newf_data, newa_data]
+        ncollection.update_one({"Date": date}, {"$set": existing_record})
+        return jsonify({'message': 'success'}), 200
+    else:
+        record = {
+            "Date": date,
+            "I_A": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "I_B": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "I_C": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "I_D": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "II_A": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "II_B": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "II_C": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "II_D": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "III_A": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "III_B": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "III_C": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "III_D": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "IV_A": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "IV_B": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "IV_C": [[0, 0, 0, 0], [0, 0, 0, 0]],
+            "IV_D": [[0, 0, 0, 0], [0, 0, 0, 0]],
+        }
+        ncollection.insert_one(record)
+        existing_record = ncollection.find_one({"Date": date})
+        newf_data = []
+        newa_data = []
+        newf_data.append(atten_det[0]['total'])
+        newf_data.append(atten_det[0]['fnp'])
+        newf_data.append(atten_det[0]['fna'])
+        newf_data.append(atten_det[0]['fond'])
+        newa_data.append(atten_det[0]['total'])
+        newa_data.append(atten_det[0]['anp'])
+        newa_data.append(atten_det[0]['ana'])
+        newa_data.append(atten_det[0]['aond'])
+        existing_record[collection_name] = [newf_data, newa_data]
+        ncollection.update_one({"Date": date}, {"$set": existing_record})
+        return jsonify({'message': 'success'}), 200
 
 
 @app.route('/updateattendance', methods=['POST'])
@@ -529,6 +674,139 @@ def get_month_attendance():
     return jsonify({'message': "yes", "data": month_attendance}), 200
 
 
+@app.route('/getSmonthattendance', methods=['POST'])
+def get_Smonth_attendance():
+    user = request.json
+    year = user['year']
+    mail = user['mail']
+    section = user['section']
+    start_month_str = user["startmonth"]
+    end_month_str = user["endmonth"]
+    # print(start_month_str)
+    # print(end_month_str)
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    start_month = datetime.strptime(start_month_str, '%b %Y')
+
+    end_month = datetime.strptime(end_month_str, '%b %Y')
+    start_month_str = datetime.strftime(start_month, '%b %Y')
+    end_month_str = datetime.strftime(end_month, '%b %Y')
+    # print(start_month_str)
+    # print(end_month_str)
+    month_attendance = []
+    student_collection = students_collection.find()
+    total_days = 0
+    for student in student_collection:
+        if student['Official Mail ID (College)'] == mail:
+            total_present = 0
+            total_onduty = 0
+            total_absent = 0
+            working_days = {
+
+            }
+            # Extract the month and year from the first date in the record
+            first_date = datetime.strptime(
+                list(student['Date'].keys())[0], '%b %d, %Y')
+            first_month_year = datetime.strftime(first_date, '%b %Y')
+            # print(first_month_year)
+
+        # Extract the month and year from the last date in the record
+            last_date = datetime.strptime(
+                list(student['Date'].keys())[-1], '%b %d, %Y')
+            last_month_year = datetime.strftime(last_date, '%b %Y')
+            # print(last_month_year)
+            start_month_date = datetime.strptime(start_month_str, '%b %Y')
+            first_month_date = datetime.strptime(first_month_year, '%b %Y')
+            end_month_date = datetime.strptime(end_month_str, '%b %Y')
+            last_month_date = datetime.strptime(last_month_year, '%b %Y')
+
+        # Check if start_month and end_month fall within the same month and year in the record
+            if start_month_date < first_month_date or start_month_date > last_month_date or start_month_date > end_month_date:
+                # print("syes")
+                return jsonify({"message":          "nomonth"}), 200
+            if end_month_date > last_month_date or end_month_date < first_month_date or end_month_date < start_month_date:
+                # print("eyes")
+                return jsonify({"message":          "nomonth"}), 200
+            else:
+
+                student_attendance = {
+                    'name': student['Name of the Student'], 'RegisterNumber': student['Register Number']}
+
+                for dt in rrule(MONTHLY, dtstart=start_month, until=end_month):
+                    m_p = 0
+                    m_a = 0
+                    m_o = 0
+                    month_year = dt.strftime('%b %Y')
+                    attendance_info = {
+                        'forenoon': {
+                            'present': 0,
+                            'absent': 0,
+                            'onduty': 0
+                        },
+                        'afternoon': {
+                            'present': 0,
+                            'absent': 0,
+                            'onduty': 0
+                        }
+                    }
+
+                    current_month = 0
+                    for date_key, attendance_list in student['Date'].items():
+                        date = datetime.strptime(date_key, '%b %d, %Y')
+
+                        if date.month == dt.month and date.year == dt.year:
+                            current_month += 1
+                            for i, attendance in enumerate(attendance_list):
+                                if i < 4:
+                                    if attendance == 1:
+                                        total_present += 1
+                                        m_p += 1
+                                        attendance_info['forenoon']['present'] += 1
+                                    elif attendance == 0:
+                                        m_a += 1
+                                        attendance_info['forenoon']['absent'] += 1
+                                        total_absent += 1
+                                    elif attendance == 0.5:
+                                        m_o += 1
+                                        total_onduty += 1
+                                        attendance_info['forenoon']['onduty'] += 1
+                                else:
+                                    if attendance == 1:
+                                        m_p += 1
+                                        total_present += 1
+                                        attendance_info['afternoon']['present'] += 1
+                                    elif attendance == 0:
+                                        m_a += 1
+                                        total_absent += 1
+                                        attendance_info['afternoon']['absent'] += 1
+                                    elif attendance == 0.5:
+                                        m_o += 1
+                                        total_onduty += 1
+                                        attendance_info['afternoon']['onduty'] += 1
+                    student_attendance[month_year] = attendance_info
+                    # student_attendance["Present(" + month_year + ")"] = m_p
+                    # student_attendance["Absent(" + month_year + ")"] = m_a
+                    # student_attendance["On-Duty(" + month_year + ")"] = m_o
+                    working_days[month_year] = current_month
+
+            total_days = ((total_present+total_absent+total_onduty)//7)
+            percentage = round((total_present/(total_days*7))*100, 2)
+
+            student_attendance['working_days'] = working_days
+            student_attendance['total_present'] = total_present
+            student_attendance['total_absent'] = total_absent
+            student_attendance['total_onduty'] = total_onduty
+            student_attendance['percentage'] = percentage
+            print(student_attendance)
+            month_attendance.append(student_attendance)
+            break
+        else:
+            continue
+
+    # print(month_attendance)
+    return jsonify({'message': "yes", "data": month_attendance}), 200
+
+
 @app.route('/getdateattendance', methods=['POST'])
 def get_date_attendance():
     user = request.json
@@ -606,6 +884,87 @@ def get_date_attendance():
                     student_attendance[date_str] = attendance_info
             date_attendance.append(student_attendance)
     print(date_attendance)
+    return jsonify({'message': "yes", "data": date_attendance
+                    }), 200
+
+
+@app.route('/getSdateattendance', methods=['POST'])
+def get_Sdate_attendance():
+    user = request.json
+    mail = user['mail']
+    year = user['year']
+    section = user['section']
+    start_date_str = user["startdate"]
+    end_date_str = user["enddate"]
+
+    # print(start_month_str)
+    # print(end_month_str)
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    start_date = datetime.strptime(start_date_str, '%d %b %Y')
+    end_date = datetime.strptime(end_date_str, '%d %b %Y')
+    start_date_str = datetime.strftime(start_date, '%d %b %Y')
+    end_date_str = datetime.strftime(end_date, '%d %b %Y')
+    # print(start_month_str)
+    # print(end_month_str)
+    date_attendance = []
+    student_collection = students_collection.find()
+    total_days = 0
+    for student in student_collection:
+        if student['Official Mail ID (College)'] == mail:
+            # Extract the month and year from the first date in the record
+            start_date = datetime.strptime(start_date_str, '%d %b %Y')
+            end_date = datetime.strptime(end_date_str, '%d %b %Y')
+
+    # Extract the month and year from the first date in the record
+            first_date = datetime.strptime(
+                list(student['Date'].keys())[0], '%b %d, %Y')
+            first_month_year = datetime.strftime(first_date, '%b %Y')
+
+    # Extract the month and year from the last date in the record
+            last_date = datetime.strptime(
+                list(student['Date'].keys())[-1], '%b %d, %Y')
+            last_month_year = datetime.strftime(last_date, '%b %Y')
+            if start_date < first_date or end_date > last_date or start_date > last_date or end_date < first_date:
+                if (end_date > last_date):
+                    end_date = last_date
+                print("yes")
+                return jsonify({"message": "nomonth"}), 200
+
+            else:
+                student_attendance = {
+                    'name': student['Name of the Student'], 'RegisterNumber': student['Register Number']}
+                attendance_info = {
+                }
+                for dt in rrule(DAILY, dtstart=start_date, until=end_date):
+                    date_str = dt.strftime('%b %d, %Y')
+                    attendance = student['Date'].get(date_str)
+                    if attendance:
+                        forenoon_attendance = attendance[:4]
+                        afternoon_attendance = attendance[4:]
+                        f_p_c = forenoon_attendance.count(1)
+                        f_a_c = forenoon_attendance.count(0)
+                        f_o_c = forenoon_attendance.count(0.5)
+                        a_p_c = afternoon_attendance.count(1)
+                        a_a_c = afternoon_attendance.count(0)
+                        a_o_c = afternoon_attendance.count(0.5)
+                        if f_p_c == 4:
+                            attendance_info['forenoon'] = "Present"
+                        elif f_a_c == 4:
+                            attendance_info['forenoon'] = "Absent"
+                        elif f_o_c == 4:
+                            attendance_info['forenoon'] = "On-Duty"
+                        if a_p_c == 3:
+                            attendance_info['afternoon'] = "Present"
+                        elif a_a_c == 3:
+                            attendance_info['afternoon'] = "Absent"
+                        elif a_o_c == 3:
+                            attendance_info['afternoon'] = "On-Duty"
+                        student_attendance[date_str] = attendance_info
+                date_attendance.append(student_attendance)
+            break
+        print(date_attendance)
+
     return jsonify({'message': "yes", "data": date_attendance
                     }), 200
 

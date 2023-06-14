@@ -143,7 +143,14 @@ export class FacultyComponent {
   public columnDefs: (ColDef | ColGroupDef)[] = [];
   public defaultColDef: ColDef = {};
   public rowData!: [];
+  private griddApi!: GridApi;
+  public griddOptions: GridOptions = {};
+  public columndDefs: (ColDef | ColGroupDef)[] = [];
+  public ddefaultColDef: ColDef = {};
+  public rowdData!: [];
   private sortingOrder: any;
+  showres = false;
+  showsub = true;
   constructor(
     private authService: SocialAuthService,
     private router: Router,
@@ -156,6 +163,7 @@ export class FacultyComponent {
     this.maxDate = new Date();
     this.displayedAttendancecolumns = [];
     this.rowData = [];
+    this.rowdData = [];
 
     this.columnDefs = [
       {
@@ -175,6 +183,28 @@ export class FacultyComponent {
     ];
 
     this.defaultColDef = {
+      flex: 1,
+      minWidth: 100,
+      resizable: true,
+    };
+    this.columndDefs = [
+      {
+        headerName: 'Name',
+        field: 'name',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Register Number',
+        field: 'RegisterNumber',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+    ];
+
+    this.ddefaultColDef = {
       flex: 1,
       minWidth: 100,
       resizable: true,
@@ -232,7 +262,29 @@ export class FacultyComponent {
     this.selectedDate = event.value.toLocaleString('en-US', this.options1);
     console.log(this.selectedDate);
   }
+  reset() {
+    this.showTable = false;
+    this.showres = false;
+    this.showsub = true;
+  }
+  record() {
+    this.selectedDate = moment(this.selectedDate).format('MMM DD, YYYY');
+    this.auth
+      .recordattendance(
+        sessionStorage.getItem('year'),
+        sessionStorage.getItem('section'),
+        this.selectedDate
+      )
+      .subscribe((response) => {
+        if (response.message == 'success') {
+          this.toastr.success('Updated');
+        }
+      });
+  }
   getattendance() {
+    this.showsub = false;
+    this.showres = true;
+    this.showTable = true;
     this.selectedDate = moment(this.selectedDate).format('MMM DD, YYYY');
     this.auth
       .getattendance(
@@ -417,6 +469,53 @@ export class FacultyComponent {
     this.attendancedataSource = [];
     this.columns = [];
     this.months = [];
+    this.rowData = [];
+    this.rowdData = [];
+
+    this.columnDefs = [
+      {
+        headerName: 'Name',
+        field: 'name',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Register Number',
+        field: 'RegisterNumber',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+    ];
+
+    this.defaultColDef = {
+      flex: 1,
+      minWidth: 100,
+      resizable: true,
+    };
+    this.columndDefs = [
+      {
+        headerName: 'Name',
+        field: 'name',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Register Number',
+        field: 'RegisterNumber',
+        sortingOrder: ['asc', 'desc'],
+        sortable: true,
+        filter: true,
+      },
+    ];
+
+    this.ddefaultColDef = {
+      flex: 1,
+      minWidth: 100,
+      resizable: true,
+    };
     this.showmt = false;
     this.showdt = false;
     this.startMonth = sessionStorage.getItem('sm');
@@ -511,6 +610,9 @@ export class FacultyComponent {
   }
   onGridReady(params: any) {
     this.gridApi = params.api;
+  }
+  ondGridReady(params: any) {
+    this.griddApi = params.api;
   }
   processResponseData(data: any) {
     // Process the dynamic data and update columnDefs
@@ -617,14 +719,14 @@ export class FacultyComponent {
         },
       ];
 
-      this.columnDefs.push({
+      this.columndDefs.push({
         headerName: month,
         children: monthColumns,
       });
     });
 
     // Update rowData with the dynamic data
-    this.rowData = data;
+    this.rowdData = data;
     console.log(this.rowData);
   }
 

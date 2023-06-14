@@ -89,6 +89,13 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getFacultyData`, data);
   }
+  getStudentData(email: any) {
+    const data = {
+      email: email,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getStudentData`, data);
+  }
+
   getattendance(year: any, section: any, date: any) {
     const data = {
       year: year,
@@ -96,6 +103,14 @@ export class AuthService {
       date: date,
     };
     return this.http.post<any>(`${this.BASE_URL}/getattendance`, data);
+  }
+  recordattendance(year: any, section: any, date: any) {
+    const data = {
+      year: year,
+      section: section,
+      date: date,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/recordattendance`, data);
   }
   updateattendance(
     year: any,
@@ -121,6 +136,38 @@ export class AuthService {
       endmonth: endmonth,
     };
     return this.http.post<any>(`${this.BASE_URL}/getmonthattendance`, data);
+  }
+  getSmonthattendance(
+    mail: any,
+    year: any,
+    section: any,
+    startmonth: any,
+    endmonth: any
+  ) {
+    const data = {
+      mail: mail,
+      year: year,
+      section: section,
+      startmonth: startmonth,
+      endmonth: endmonth,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getSmonthattendance`, data);
+  }
+  getSdateattendance(
+    mail: any,
+    year: any,
+    section: any,
+    startdate: any,
+    enddate: any
+  ) {
+    const data = {
+      mail: mail,
+      year: year,
+      section: section,
+      startdate: startdate,
+      enddate: enddate,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getSdateattendance`, data);
   }
   getdateattendance(year: any, section: any, startdate: any, enddate: any) {
     const data = {

@@ -79,6 +79,7 @@ export class HomeComponent implements OnInit {
                   this.router.navigate(['faculty']);
                 } else if (this.userType === 'student') {
                   sessionStorage.setItem('user', this.userType.toUpperCase());
+                  sessionStorage.setItem('email', this.user.email);
                   sessionStorage.setItem('name', this.user.firstName);
                   sessionStorage.setItem('photo', this.user.photoUrl);
                   this.router.navigate(['student']);

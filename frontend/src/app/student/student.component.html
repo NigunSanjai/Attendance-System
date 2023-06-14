@@ -1,1 +1,115 @@
-<p>student works!</p>
+<div class="main">
+  <nav class="nav">
+    <div class="sec1">
+      <span class="title">Attendance Management (Student)</span>
+    </div>
+    <div class="sec2">
+      <img [src]="url" alt="" (click)="toggleLogout()" />
+    </div>
+  </nav>
+  <button *ngIf="showLogout" class="logout" (click)="logout()">LogOut</button>
+  <div class="mainflex">
+    <div style="display: flex; flex-direction: column; gap: 2rem">
+      <div
+        style="
+          display: flex;
+          gap: 1rem;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <mat-form-field style="margin-top: 20px">
+          <mat-label>Select Date Type</mat-label>
+          <mat-select [(ngModel)]="dateType" (click)="onAttSel()">
+            <mat-option value="month">Month</mat-option>
+            <mat-option value="day">Day</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div *ngIf="dateType === 'month'">
+          <app-month-calender></app-month-calender>
+        </div>
+
+        <div *ngIf="dateType === 'day'">
+          <mat-form-field style="margin-top: 20px; margin-right: 10px">
+            <mat-label>Start date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              [formControl]="startDate"
+            />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field style="margin-top: 20px; margin-right: 10px">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="picker1" [formControl]="endDate" />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker1"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <button mat-raised-button color="accent" (click)="onSelect()">
+          Submit
+        </button>
+      </div>
+
+      <!--MONTH TABLE-->
+      <div
+        *ngIf="showmt"
+        style="
+          display: flex;
+          height: 300px;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+        "
+        class="ag-theme-alpine"
+      >
+        <ag-grid-angular
+          #agGrid
+          style="width: 90%; height: 100%"
+          class="ag-theme-alpine"
+          [rowData]="rowData"
+          [columnDefs]="columnDefs"
+          [defaultColDef]="defaultColDef"
+          [pagination]="true"
+          [paginationPageSize]="10"
+          [gridOptions]="gridOptions"
+        ></ag-grid-angular>
+      </div>
+      <div
+        *ngIf="showdt"
+        style="
+          display: flex;
+          height: 300px;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+        "
+        class="ag-theme-alpine"
+      >
+        <ag-grid-angular
+          #agGrid
+          style="width: 90%; height: 100%"
+          class="ag-theme-alpine"
+          [rowData]="rowdData"
+          [columnDefs]="columndDefs"
+          [defaultColDef]="ddefaultColDef"
+          [pagination]="true"
+          [paginationPageSize]="10"
+          [gridOptions]="griddOptions"
+        ></ag-grid-angular>
+      </div>
+    </div>
+  </div>
+</div>

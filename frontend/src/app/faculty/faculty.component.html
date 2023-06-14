@@ -14,7 +14,6 @@
         <p>Dashboard</p>
       </div>
       <div class="sn" (click)="toggleae()"><p>Add/Edit Profile</p></div>
-      <div class="sn"><p>Dashboard</p></div>
     </div>
     <div class="main-section">
       <div class="dashboard" *ngIf="showDash">
@@ -56,9 +55,22 @@
             ></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
-          <button mat-raised-button color="primary" (click)="getattendance()">
+          <button
+            *ngIf="showsub"
+            mat-raised-button
+            color="primary"
+            (click)="getattendance()"
+          >
             Submit
           </button>
+          <div *ngIf="showres" style="display: flex; gap: 2rem">
+            <button mat-raised-button color="primary" (click)="record()">
+              Record
+            </button>
+            <button mat-raised-button color="primary" (click)="reset()">
+              Reset
+            </button>
+          </div>
         </div>
         <div
           style="display: flex; justify-content: center; gap: 2rem"
@@ -283,13 +295,13 @@
               #agGrid
               style="width: 100%; height: 100%"
               class="ag-theme-alpine"
-              [rowData]="rowData"
-              [columnDefs]="columnDefs"
-              [defaultColDef]="defaultColDef"
+              [rowData]="rowdData"
+              [columnDefs]="columndDefs"
+              [defaultColDef]="ddefaultColDef"
               [pagination]="true"
               [paginationPageSize]="10"
-              [gridOptions]="gridOptions"
-              (gridReady)="onGridReady($event)"
+              [gridOptions]="griddOptions"
+              (gridReady)="ondGridReady($event)"
             ></ag-grid-angular>
           </div>
           <div></div>
