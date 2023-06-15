@@ -8,6 +8,7 @@ from datetime import datetime
 from dateutil.rrule import rrule, MONTHLY, DAILY
 app = Flask(__name__)
 
+
 # Configure the JWT manager with the secret key
 app.config['JWT_SECRET_KEY'] = 'secret-key'
 jwt = JWTManager(app)
@@ -272,7 +273,7 @@ def get_student_data():
     user = request.json
     email = user['email']
     collections = mongo.db.list_collection_names()
-    # print(collections)
+    print(collections)
 
     for collection in collections:
         document = mongo.db[collection]
@@ -282,8 +283,8 @@ def get_student_data():
             section = result.get("section")
             print(year, section)
             return jsonify({"year": year, "section": section, "message": "Got"}), 200
-        else:
-            return jsonify({'message': 'no'}), 200
+    else:
+        return jsonify({'message': 'no'}), 200
 
 
 @app.route('/getattendance', methods=['POST'])
@@ -317,7 +318,7 @@ def get_attendance():
 
         })
         sorted_date = record.get('Date', {})
-        # print(sorted_date)
+        print(sorted_date)
         sorted_keys = sorted(sorted_date.keys(),
                              key=lambda x: datetime.strptime(x, '%b %d, %Y'))
         sorted_dict = {}
@@ -491,6 +492,131 @@ def record_attendance():
         existing_record[collection_name] = [newf_data, newa_data]
         ncollection.update_one({"Date": date}, {"$set": existing_record})
         return jsonify({'message': 'success'}), 200
+
+
+@app.route('/getfattendance', methods=['POST'])
+def get_f_attendance():
+    user = request.json
+    date = user['date']
+    collection = mongo.db["AdminAttendance"]
+    records = collection.find({'Date': date})
+    response_data = {}
+# Get the current time
+    current_time = datetime.now().time()
+
+# Create a datetime object for the target time (2 PM)
+    target_time = datetime(datetime.now().year,
+                           datetime.now().month, datetime.now().day, 14, 0)
+    for record in records:
+        for section, values in record.items():
+            if section != "_id" and section != "Date" and isinstance(values, list) and len(values) > 0:
+                first_value = values[0][0]
+                last_value = values[1][0]
+                if current_time < target_time.time():
+                    if first_value == 0:
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            },
+                            'afternoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            }
+                        }
+
+                    else:
+                        forenoon_values = values[0]
+
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': forenoon_values[0],
+                                'present': forenoon_values[1],
+                                'absent': forenoon_values[2],
+                                'on-duty': forenoon_values[3]
+                            },
+                            'afternoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            }
+                        }
+                else:
+                    forenoon_values = values[0]  # First array (forenoon)
+                    afternoon_values = values[1]
+
+                    if first_value == 0 and last_value == 0:
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            },
+                            'afternoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            }
+                        }
+                    elif first_value == 0:
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            },
+                            'afternoon': {
+                                'total': afternoon_values[0],
+                                'present': afternoon_values[1],
+                                'absent': afternoon_values[2],
+                                'on-duty': afternoon_values[3]
+                            }
+                        }
+
+                    elif last_value == 0:
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': forenoon_values[0],
+                                'present': forenoon_values[1],
+                                'absent': forenoon_values[2],
+                                'on-duty': forenoon_values[3]
+                            },
+                            'afternoon': {
+                                'total': "Not Recorded",
+                                'present': "Not Recorded",
+                                'absent': "Not Recorded",
+                                'on-duty': "Not Recorded"
+                            }
+                        }
+
+                    else:
+                        response_data[section] = {
+                            'forenoon': {
+                                'total': forenoon_values[0],
+                                'present': forenoon_values[1],
+                                'absent': forenoon_values[2],
+                                'on-duty': forenoon_values[3]
+                            },
+                            'afternoon': {
+                                'total': afternoon_values[0],
+                                'present': afternoon_values[1],
+                                'absent': afternoon_values[2],
+                                'on-duty': afternoon_values[3]
+                            }
+                        }
+    print(response_data)
+    if (len(response_data) == 0):
+        return jsonify({"message": "nope"}), 200
+
+    return jsonify({"data": response_data}), 200
 
 
 @app.route('/updateattendance', methods=['POST'])

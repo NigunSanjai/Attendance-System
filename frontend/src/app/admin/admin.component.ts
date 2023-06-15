@@ -13,6 +13,14 @@ import { MatSort, Sort } from '@angular/material/sort';
 import { Renderer2 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PopupComponent } from '../popup/popup.component';
+import { GridOptions } from 'ag-grid-community';
+import {
+  ColDef,
+  ColGroupDef,
+  GridApi,
+  GridReadyEvent,
+} from 'ag-grid-community';
+import 'ag-grid-enterprise';
 
 @Component({
   selector: 'app-admin',
@@ -25,7 +33,9 @@ export class AdminComponent implements OnInit {
   showLogout = false;
   showDash = true;
   showae = false;
+  showv = false;
   showTable = false;
+  showvTable = false;
   marginRight = '40rem';
   fileName = '';
   decide = false;
@@ -41,6 +51,12 @@ export class AdminComponent implements OnInit {
     'Edit',
     'Delete',
   ];
+  options1: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+  rselectedDate: string = '';
   userreqyear!: any;
   userreqsec!: any;
   myForm = new FormGroup({
@@ -52,9 +68,14 @@ export class AdminComponent implements OnInit {
     file: new FormControl('', [Validators.required]),
     fileSource: new FormControl('', [Validators.required]),
   });
+  private gridApi!: GridApi;
+  // public gridOptions: GridOptions = {};
+  // public columnDefs: (ColDef | ColGroupDef)[] = [];
+  // public defaultColDef: ColDef = {};
+  rowData: any[];
+  columnDefs: any[];
   @ViewChild(MatPaginator) paginatior!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
-
   constructor(
     private router: Router,
     private authService: SocialAuthService,
@@ -79,16 +100,26 @@ export class AdminComponent implements OnInit {
       this.decide = false;
     }
     this.showae = false;
+    this.showv = false;
     this.marginRight = '40rem';
+    this.showvTable = false;
   }
   toggleae() {
     this.showae = true;
     this.showDash = false;
     this.decide = true;
     this.showTable = false;
+    this.showv = false;
+    this.marginRight = '20px';
+    this.showvTable = false;
+  }
+  toggleview() {
+    this.showae = false;
+    this.showDash = false;
+    this.showv = true;
+    this.showvTable = false;
     this.marginRight = '20px';
   }
-
   logout() {
     sessionStorage.clear();
     sessionStorage.setItem('notloggedin', 'true');
@@ -272,5 +303,69 @@ export class AdminComponent implements OnInit {
   Filterchange(data: Event) {
     const value = (data.target as HTMLInputElement).value;
     this.dataSource.filter = value;
+  }
+  onDateSelected(event: any): void {
+    this.showTable = false;
+    this.rselectedDate = event.value.toLocaleString('en-US', this.options1);
+    console.log(this.rselectedDate);
+  }
+  getfattendance() {
+    this.columnDefs = [];
+    this.rowData = [];
+    this.auth.getfattendance(this.rselectedDate).subscribe((response) => {
+      if (response.message === 'nope') {
+        this.toastr.warning('Attendance not recorded Still');
+      } else {
+        this.columnDefs = [
+          { headerName: 'Class', field: 'class' },
+          {
+            headerName: 'Forenoon',
+            children: [
+              { headerName: 'Total', field: 'forenoon.total' },
+              { headerName: 'Present', field: 'forenoon.present' },
+              { headerName: 'Absent', field: 'forenoon.absent' },
+              { headerName: 'On-Duty', field: 'forenoon.on-duty' },
+            ],
+          },
+          {
+            headerName: 'Afternoon',
+            children: [
+              { headerName: 'Total', field: 'afternoon.total' },
+              { headerName: 'Present', field: 'afternoon.present' },
+              { headerName: 'Absent', field: 'afternoon.absent' },
+              { headerName: 'On-Duty', field: 'afternoon.on-duty' },
+            ],
+          },
+        ];
+        this.rowData = this.transformResponse(response.data);
+        this.showvTable = true;
+      }
+    });
+  }
+  transformResponse(response: any): any[] {
+    const rowData = [];
+    for (const section in response) {
+      if (response.hasOwnProperty(section)) {
+        const data = response[section];
+        const row = {
+          class: section,
+          forenoon: {
+            total: data.forenoon.total,
+            present: data.forenoon.present,
+            absent: data.forenoon.absent,
+            'on-duty': data.forenoon['on-duty'],
+          },
+          afternoon: {
+            total: data.afternoon.total,
+            present: data.afternoon.present,
+            absent: data.afternoon.absent,
+            'on-duty': data.afternoon['on-duty'],
+          },
+        };
+        rowData.push(row);
+      }
+    }
+
+    return rowData;
   }
 }

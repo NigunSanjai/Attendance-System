@@ -57,7 +57,9 @@ export class PopupComponent {
     console.log(this.studentData.registerNumber);
 
     if (/^.{7}$/.test(this.studentData.registerNumber)) {
+      console.log('yes');
       if (/^[6789]\d{9}$/.test(this.studentData.fatherMobileNumber)) {
+        console.log('yes');
         if (/^[6789]\d{9}$/.test(this.studentData.motherMobileNumber)) {
           this.studentData.action = 'add';
           this.studentData.registerNumber =
@@ -73,7 +75,8 @@ export class PopupComponent {
     console.log(this.editData.registerNumber);
     console.log(this.editData);
 
-    if (/^.{7}$/.test(this.editData.registerNumber)) {
+    if (/^.{7,8}$/.test(this.editData.registerNumber)) {
+      console.log('yes');
       if (/^[6789]\d{9}$/.test(this.editData.father_mobile_number)) {
         if (/^[6789]\d{9}$/.test(this.editData.mother_mobile_number)) {
           console.log('yes');

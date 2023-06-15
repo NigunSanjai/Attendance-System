@@ -104,6 +104,12 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getattendance`, data);
   }
+  getfattendance(date: any) {
+    const data = {
+      date: date,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/getfattendance`, data);
+  }
   recordattendance(year: any, section: any, date: any) {
     const data = {
       year: year,

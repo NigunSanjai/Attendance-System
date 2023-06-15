@@ -451,15 +451,6 @@ export class FacultyComponent {
     this.dataSource.filter = value;
   }
 
-  // DATA GETTING SECTION
-  // myDateFormat = (date: Date) => {
-  //   const formattedDate = moment(date).format(MY_DATE_FORMAT);
-  //   const currentDate = moment().format(MY_DATE_FORMAT);
-  //   return (
-  //     moment(formattedDate, MY_DATE_FORMAT, true).isValid() &&
-  //     formattedDate >= currentDate
-  //   );
-  // };
   onAttSel() {
     this.showmt = false;
     this.showdt = false;
@@ -561,31 +552,6 @@ export class FacultyComponent {
           if (response.message == 'yes') {
             this.showdt = true;
             this.showmt = false;
-            // this.dcolumns = ['Name', 'Register Number']; //
-            // console.log(response.data);
-            // this.ddates = Object.keys(response.data[0])
-            //   .filter(
-            //     (key) =>
-            //       key !== 'name' &&
-            //       key !== 'RegisterNumber' &&
-            //       key !== 'working_days' &&
-            //       key !== 'total_present' &&
-            //       key !== 'total_absent' &&
-            //       key !== 'total_onduty' &&
-            //       key !== 'percentage'
-            //   )
-            //   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-            // this.dcolumns.push(...this.ddates);
-
-            // this.daywisedataSource = new MatTableDataSource([]);
-            // this.daywisedataSource = new MatTableDataSource(response.data);
-            // this.daywisedataSource.sort = this.sort;
-            // this.cdr.detectChanges();
-            // this.daywisedataSource.paginator = this.paginatior;
-
-            // console.log(this.daywisedataSource);
-            // console.log(this.dcolumns);
-            // console.log(this.ddates);
             this.processDResponseData(response.data);
           }
         });
