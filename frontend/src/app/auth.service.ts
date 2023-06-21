@@ -34,6 +34,13 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/getdata`, data).toPromise();
   }
+  getMentorData(year: any, section: any) {
+    const data = {
+      year: year,
+      section: section,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/editmentor`, data);
+  }
   updateStudent(
     name: any,
     regno: any,
@@ -81,6 +88,22 @@ export class AuthService {
       section: sec,
     };
     return this.http.post<any>(`${this.BASE_URL}/deleteStudent`, data);
+  }
+  updateMentor(
+    year: any,
+    section: any,
+    mentor1: any,
+    mentor2: any,
+    mentor3: any
+  ) {
+    const data = {
+      year: year,
+      section: section,
+      mentor1: mentor1,
+      mentor2: mentor2,
+      mentor3: mentor3,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/updateMentor`, data);
   }
 
   getFacultyData(email: any) {

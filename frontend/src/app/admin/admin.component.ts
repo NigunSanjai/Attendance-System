@@ -4,12 +4,12 @@ import { CookieService } from 'ngx-cookie-service';
 import { SocialAuthService } from '@abacritt/angularx-social-login';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormControl } from '@angular/forms';
-import * as Papa from 'papaparse';
+
 import { AuthService } from '../auth.service';
 import { Toast, ToastrService } from 'ngx-toastr';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { Renderer2 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PopupComponent } from '../popup/popup.component';
@@ -170,6 +170,45 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+  openMPopup() {
+    let mentors: any[] = [];
+    this.auth
+      .getMentorData(this.userreqyear, this.userreqsec)
+      .subscribe((response) => {
+        mentors = response.data;
+        console.log(mentors);
+        const popup = this.matdialog.open(PopupComponent, {
+          width: '80%',
+          height: '420px',
+          enterAnimationDuration: '1000ms',
+          exitAnimationDuration: '1000ms',
+          disableClose: true,
+          data: {
+            current: 'EditMentor',
+            mentor: mentors,
+          },
+        });
+        popup.afterClosed().subscribe((item) => {
+          if (item.action == 'editmentor') {
+            this.auth
+              .updateMentor(
+                this.userreqyear,
+                this.userreqsec,
+                item.mentor1,
+                item.mentor2,
+                item.mentor3
+              )
+              .subscribe((response) => {
+                console.log(response);
+                if (response.message == 'success') {
+                  this.toastr.success('Change Done Sucessfully');
+                  this.getData();
+                }
+              });
+          }
+        });
+      });
+  }
 
   editPopup(element: any) {
     console.log(element);
@@ -289,6 +328,12 @@ export class AdminComponent implements OnInit {
         this.showTable = true;
         this.dataSource = new MatTableDataSource([]);
         this.dataSource = new MatTableDataSource(this.pagData);
+        this.pagData.sort(
+          (a: { register_no: string }, b: { register_no: any }) => {
+            // Assuming Register Number is a string
+            return a.register_no.localeCompare(b.register_no);
+          }
+        );
         this.dataSource.sort = this.sort;
         this.cdr.detectChanges();
         this.dataSource.paginator = this.paginatior;

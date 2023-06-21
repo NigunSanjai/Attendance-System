@@ -1,24 +1,35 @@
 import csv
 import io
+import ssl
 from flask import Flask, jsonify, request
+import certifi
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS, cross_origin
 from flask_pymongo import PyMongo
-from datetime import datetime
+from pymongo import MongoClient
+from datetime import datetime, time
 from dateutil.rrule import rrule, MONTHLY, DAILY
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 app = Flask(__name__)
-
 
 # Configure the JWT manager with the secret key
 app.config['JWT_SECRET_KEY'] = 'secret-key'
 jwt = JWTManager(app)
+# CORS(app)
+# uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
+mongo = MongoClient(uri, tlsCAFile=certifi.where())
+# try:
+#     client.admin.command('ping')
+#     print("Pinged your deployment. You successfully connected to MongoDB!")
+# except Exception as e:
+#     print(e)
+# app.config['MONGO_DBNAME'] = 'AttendanceSystem'
+# app.config['MONGO_URI'] = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
 
-CORS(app)
-
-app.config['MONGO_DBNAME'] = 'AttendanceSystem'
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/AttendanceSystem'
-
-mongo = PyMongo(app)
+# client = MongoClient(
+#     "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority")
 
 
 @app.route('/api/login', methods=['POST'])
@@ -150,6 +161,46 @@ def get_students():
     return jsonify(data), 200
 
 
+@app.route('/editmentor', methods=['POST'])
+def edit_mentor():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    first_record = students_collection.find_one()
+
+    # Get the values of 'mentor1', 'mentor2', and 'mentor3' as an array
+    mentors = [first_record['mentor1'], first_record['mentor2']]
+    if 'mentor3' in first_record:
+        mentors.append(first_record['mentor3'])
+    print(mentors)
+    return jsonify({'data': mentors}), 200
+
+
+@app.route('/updateMentor', methods=['POST'])
+def update_mentor():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    mentor1 = user['mentor1']
+    mentor2 = user['mentor2']
+    mentor3 = user['mentor3']
+
+    collection_name = f"{year}_{section}"
+    students_collection = mongo.db[collection_name]
+    records = students_collection.find()
+
+# Update each record with mentor values
+    for record in records:
+        record['mentor1'] = mentor1
+        record['mentor2'] = mentor2
+        record['mentor3'] = mentor3
+        students_collection.update_one(
+            {'_id': record['_id']}, {'$set': record})
+    return jsonify({'message': 'success'}), 200
+
+
 @app.route('/addStudent', methods=['POST'])
 def add_student():
     user = request.json
@@ -187,6 +238,8 @@ def add_student():
     student_data[common_fields[9]] = mentor2
     if mentor3:
         student_data['mentor3'] = mentor3
+    current_date = datetime.now().strftime("%b %d, %Y")
+    student_data['Date'] = {current_date: [0] * 7}
     students_collection.insert_one(student_data)
     return jsonify({'message': 'success'}), 200
 
@@ -502,11 +555,11 @@ def get_f_attendance():
     records = collection.find({'Date': date})
     response_data = {}
 # Get the current time
+    current_date = datetime.now().date()
     current_time = datetime.now().time()
 
-# Create a datetime object for the target time (2 PM)
-    target_time = datetime(datetime.now().year,
-                           datetime.now().month, datetime.now().day, 14, 0)
+    # Create a datetime object for the target time (2 PM) on the current date
+    target_time = datetime.combine(current_date, time(14, 0))
     for record in records:
         for section, values in record.items():
             if section != "_id" and section != "Date" and isinstance(values, list) and len(values) > 0:

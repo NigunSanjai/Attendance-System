@@ -11,6 +11,7 @@ export class PopupComponent {
   showAdd = false;
   showEdit = false;
   showDelete = false;
+  showEditMentor = false;
   deleno = '';
   studentData = {
     name: '',
@@ -32,6 +33,13 @@ export class PopupComponent {
     action: '',
     registerNumber: '',
   };
+  editMData = {
+    action: '',
+    mentor1: '',
+    mentor2: '',
+    mentor3: '',
+  };
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private Ref: MatDialogRef<PopupComponent>,
@@ -50,6 +58,13 @@ export class PopupComponent {
     if (this.result.current == 'Delete') {
       this.showDelete = true;
       this.deleteData.registerNumber = this.result.registerNumber;
+    }
+    if (this.result.current == 'EditMentor') {
+      this.showEditMentor = true;
+      console.log(this.result.mentor);
+      this.editMData.mentor1 = this.result.mentor[0];
+      this.editMData.mentor2 = this.result.mentor[1];
+      this.editMData.mentor3 = this.result.mentor[2];
     }
   }
 
@@ -70,6 +85,10 @@ export class PopupComponent {
     } else {
       this.toastr.error('Invalid input');
     }
+  }
+  editMsubmit() {
+    this.editMData.action = 'editmentor';
+    this.Ref.close(this.editMData);
   }
   editsubmit() {
     console.log(this.editData.registerNumber);

@@ -223,6 +223,7 @@ export class FacultyComponent {
             sessionStorage.setItem('year', response.year);
           } else {
             this.toastr.warning('Check with Admin');
+            this.logout();
           }
         });
     }
@@ -283,8 +284,7 @@ export class FacultyComponent {
   }
   getattendance() {
     this.showsub = false;
-    this.showres = true;
-    this.showTable = true;
+
     this.selectedDate = moment(this.selectedDate).format('MMM DD, YYYY');
     this.auth
       .getattendance(
@@ -297,9 +297,14 @@ export class FacultyComponent {
           this.toastr.warning('Enter the Date');
         } else {
           this.displaydata = response.data;
+          this.displaydata.sort((a: { reg_no: string }, b: { reg_no: any }) => {
+            // Assuming Register Number is a string
+            return a.reg_no.localeCompare(b.reg_no);
+          });
           this.attendance_data = response.atten_det;
           console.log(this.displaydata);
           console.log(this.attendance_data);
+          this.showres = true;
           this.showTable = true;
           this.dataSource = new MatTableDataSource([]);
           this.dataSource = new MatTableDataSource(this.displaydata);
@@ -528,6 +533,11 @@ export class FacultyComponent {
           if (response.message == 'yes') {
             this.showmt = true;
             this.showdt = false;
+            response.data.sort(
+              (a: { RegisterNumber: string }, b: { RegisterNumber: any }) => {
+                return a.RegisterNumber.localeCompare(b.RegisterNumber);
+              }
+            );
             this.processResponseData(response.data);
           }
         });
