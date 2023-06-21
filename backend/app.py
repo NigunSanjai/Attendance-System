@@ -16,7 +16,7 @@ app = Flask(__name__)
 # Configure the JWT manager with the secret key
 app.config['JWT_SECRET_KEY'] = 'secret-key'
 jwt = JWTManager(app)
-# CORS(app)
+CORS(app)
 # uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
 uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.tfyhtme.mongodb.net/?retryWrites=true&w=majority"
 
