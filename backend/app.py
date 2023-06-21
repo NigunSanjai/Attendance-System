@@ -18,7 +18,8 @@ app.config['JWT_SECRET_KEY'] = 'secret-key'
 jwt = JWTManager(app)
 # CORS(app)
 # uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
-uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.tfyhtme.mongodb.net/?retryWrites=true&w=majority"
+
 mongo = MongoClient(uri, tlsCAFile=certifi.where())
 # try:
 #     client.admin.command('ping')
