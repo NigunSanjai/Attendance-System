@@ -43,6 +43,7 @@ import { MonthCalenderComponent } from './month-calender/month-calender.componen
 import { MatTableExporterModule } from 'mat-table-exporter';
 import { AgGridModule } from 'ag-grid-angular';
 import { ExcelExportModule } from 'ag-grid-enterprise';
+import { NgxUiLoaderHttpModule, NgxUiLoaderModule } from 'ngx-ui-loader';
 @NgModule({
   declarations: [
     AppComponent,
@@ -87,6 +88,8 @@ import { ExcelExportModule } from 'ag-grid-enterprise';
     MatNativeDateModule,
     MatTableExporterModule,
     AgGridModule,
+    NgxUiLoaderModule,
+    NgxUiLoaderHttpModule,
   ],
   providers: [
     {
