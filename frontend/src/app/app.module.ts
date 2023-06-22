@@ -89,7 +89,7 @@ import { NgxUiLoaderHttpModule, NgxUiLoaderModule } from 'ngx-ui-loader';
     MatTableExporterModule,
     AgGridModule,
     NgxUiLoaderModule,
-    NgxUiLoaderHttpModule,
+    NgxUiLoaderHttpModule.forRoot({ showForeground: true }),
   ],
   providers: [
     {
