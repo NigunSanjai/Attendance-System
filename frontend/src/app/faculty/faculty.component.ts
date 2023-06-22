@@ -584,6 +584,12 @@ export class FacultyComponent {
     };
     this.gridApi.exportDataAsExcel(params);
   }
+  exportAsExcelD() {
+    const params = {
+      fileName: 'exportedData',
+    };
+    this.griddApi.exportDataAsExcel(params);
+  }
   onGridReady(params: any) {
     this.gridApi = params.api;
   }
