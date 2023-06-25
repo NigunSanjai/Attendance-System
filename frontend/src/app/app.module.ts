@@ -101,6 +101,7 @@ import { NgxUiLoaderHttpModule, NgxUiLoaderModule } from 'ngx-ui-loader';
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
               '432008233542-v4scpmvgu9c8b43g6h066qbraht0fg25.apps.googleusercontent.com'
+              // '246411872657-7n7gk7u9e9gihv1n7qkhdngp55rism70.apps.googleusercontent.com'
             ),
           },
         ],

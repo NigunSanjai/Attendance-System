@@ -8,7 +8,7 @@ import { SocialUser } from '@abacritt/angularx-social-login';
 })
 export class AuthService {
   notloggedIn = true;
-  private BASE_URL = 'https://backend-kpriet-attendance.onrender.com';
+  private BASE_URL = 'http://127.0.0.1:5000';
 
   constructor(private http: HttpClient) {}
 

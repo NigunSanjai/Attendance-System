@@ -18,9 +18,13 @@ app.config['JWT_SECRET_KEY'] = 'secret-key'
 jwt = JWTManager(app)
 CORS(app)
 # uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.o3xkdml.mongodb.net/?retryWrites=true&w=majority"
-uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.tfyhtme.mongodb.net/?retryWrites=true&w=majority"
+# uri = "mongodb+srv://nigun:XhwoAqBIHyFJNdL5@cluster0.tfyhtme.mongodb.net/?retryWrites=true&w=majority"
 
-mongo = MongoClient(uri, tlsCAFile=certifi.where())
+# mongo = MongoClient(uri, tlsCAFile=certifi.where())
+
+app.config['MONGO_DBNAME'] = 'AttendanceSystem'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/AttendanceSystem'
+mongo = PyMongo(app)
 # try:
 #     client.admin.command('ping')
 #     print("Pinged your deployment. You successfully connected to MongoDB!")
