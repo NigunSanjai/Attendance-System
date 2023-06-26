@@ -293,6 +293,8 @@ export class FacultyComponent {
       .subscribe((response) => {
         if (response.message == 'success') {
           this.toastr.success('Updated');
+          this.showres = false;
+          this.showsub = true;
         }
       });
   }
