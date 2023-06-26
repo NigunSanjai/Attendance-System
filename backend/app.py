@@ -11,6 +11,7 @@ from datetime import datetime, time
 from dateutil.rrule import rrule, MONTHLY, DAILY
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+from flask_lt import run_with_lt
 
 app = Flask(__name__)
 
@@ -1156,4 +1157,4 @@ def get_Sdate_attendance():
 
 
 if __name__ == '__main__':
-    app.run(host="10.10.41.178")
+    app.run()
