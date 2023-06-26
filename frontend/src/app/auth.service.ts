@@ -8,8 +8,7 @@ import { SocialUser } from '@abacritt/angularx-social-login';
 })
 export class AuthService {
   notloggedIn = true;
-  private BASE_URL =
-    'https://9e43-2409-40f4-1018-863d-d551-a7e6-113c-fd2f.ngrok-free.app';
+  private BASE_URL = 'https://64d2-123-63-135-33.ngrok-free.app';
 
   constructor(private http: HttpClient) {}
 
