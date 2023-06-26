@@ -12,9 +12,8 @@ from dateutil.rrule import rrule, MONTHLY, DAILY
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from flask_lt import run_with_lt
-
+from flask_ngrok import run_with_ngrok
 app = Flask(__name__)
-
 
 # Configure the JWT manager with the secret key
 app.config['JWT_SECRET_KEY'] = 'secret-key'
