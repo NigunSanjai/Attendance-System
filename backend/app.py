@@ -1155,5 +1155,5 @@ def get_Sdate_attendance():
                     }), 200
 
 
-# if __name__ == '__main__':
-#     run_with_ngrok(app)
+if __name__ == '__main__':
+    app.run(host="10.10.41.178")
