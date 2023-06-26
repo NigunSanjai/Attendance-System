@@ -282,6 +282,20 @@ export class FacultyComponent {
         }
       });
   }
+  deletes() {
+    this.selectedDate = moment(this.selectedDate).format('MMM DD, YYYY');
+    this.auth
+      .deleteattendance(
+        sessionStorage.getItem('year'),
+        sessionStorage.getItem('section'),
+        this.selectedDate
+      )
+      .subscribe((response) => {
+        if (response.message == 'success') {
+          this.toastr.success('Updated');
+        }
+      });
+  }
   getattendance() {
     this.showsub = false;
 

@@ -368,7 +368,7 @@ def get_attendance():
         reg_no = record['Register Number']
         date_dict = record.get('Date', {})
         if date not in date_dict:
-            date_dict[date] = [0] * 7
+            date_dict[date] = [1] * 7
             collection.update_one({'Register Number': record['Register Number']}, {
                                   '$set': {'Date': date_dict}})
         attendance = date_dict.get(date)
@@ -553,6 +553,24 @@ def record_attendance():
         existing_record[collection_name] = [newf_data, newa_data]
         ncollection.update_one({"Date": date}, {"$set": existing_record})
         return jsonify({'message': 'success'}), 200
+
+
+@app.route('/deleteattendance', methods=['POST'])
+def delete_attendance():
+    user = request.json
+    year = user['year']
+    section = user['section']
+    date = user['date']
+    collection_name = f"{year}_{section}"
+    collection = mongo.db[collection_name]
+    documents = collection.find({})
+    for document in documents:
+        date_dict = document['Date']
+        if date in date_dict:
+            del date_dict[date]
+        collection.update_one({'_id': document['_id']}, {
+                              '$set': {'Date': date_dict}})
+    return jsonify({'message': 'success'}), 200
 
 
 @app.route('/getfattendance', methods=['POST'])

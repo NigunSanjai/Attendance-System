@@ -142,6 +142,14 @@ export class AuthService {
     };
     return this.http.post<any>(`${this.BASE_URL}/recordattendance`, data);
   }
+  deleteattendance(year: any, section: any, date: any) {
+    const data = {
+      year: year,
+      section: section,
+      date: date,
+    };
+    return this.http.post<any>(`${this.BASE_URL}/deleteattendance`, data);
+  }
   updateattendance(
     year: any,
     section: any,
